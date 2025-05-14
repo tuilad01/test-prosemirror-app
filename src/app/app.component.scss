@@ -1,0 +1,16 @@
+:host ::ng-deep {
+    .ProseMirror {
+        border: 1px solid #000;
+    }
+    .page {
+        width: 21cm;
+        height: 29.7cm;
+        margin: 30mm 45mm 30mm 45mm;
+        border: 1px solid #000;
+
+        page-break-before: always;
+        max-height: 29.7cm;
+        box-sizing: border-box; /* Make sure padding doesn't affect the page size */
+        overflow: hidden;
+    }
+}
