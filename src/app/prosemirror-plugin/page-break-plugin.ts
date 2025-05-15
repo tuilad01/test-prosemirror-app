@@ -140,34 +140,36 @@ export function pageBreakPlugin(view: EditorView | undefined) {
         newState.doc.descendants((node, pos) => {
           // Getting current parent position
           if (node.eq(parentNode)) {
-            newParentNodePosition = transaction.mapping.map(pos);
-          }
+            newParentNodePosition = newState.tr.mapping.map(pos);
 
-          newState.doc.descendants((pageNode, pagePosition) => {
-            // Finding current page
-            if (
-              pageNode.type.name === 'page' &&
-              pagePosition < newParentNodePosition &&
-              pagePosition + pageNode.nodeSize > newParentNodePosition
-            ) {
-              currentPage = pageNode;
-              currentPagePosition = pagePosition;
-              const currentPageNumber = parseInt(
-                currentPage.attrs['page-number'],
-                10
-              );
-              nextPageNumber = currentPageNumber + 1;
-            }
-            // Finding next page
-            if (
-              currentPage &&
-              nextPageNumber &&
-              pageNode.attrs['page-number'] === nextPageNumber.toString()
-            ) {
-              nextPage = pageNode;
-              nextPagePosition = pagePosition;
-            }
-          });
+            newState.doc.descendants((pageNode, pagePosition) => {
+              // Finding current page
+              if (
+                !currentPage &&
+                pageNode.type.name === 'page' &&
+                pagePosition < newParentNodePosition &&
+                pagePosition + pageNode.nodeSize > newParentNodePosition
+              ) {
+                currentPage = pageNode;
+                currentPagePosition = pagePosition;
+                const currentPageNumber = parseInt(
+                  currentPage.attrs['page-number'],
+                  10
+                );
+                nextPageNumber = currentPageNumber + 1;
+              }
+              // Finding next page
+              if (
+                !nextPage &&
+                currentPage &&
+                nextPageNumber &&
+                pageNode.attrs['page-number'] === nextPageNumber.toString()
+              ) {
+                nextPage = pageNode;
+                nextPagePosition = pagePosition;
+              }
+            });
+          }
         });
 
         console.log(
@@ -222,14 +224,14 @@ export function pageBreakPlugin(view: EditorView | undefined) {
               { 'page-number': nextPageNumber },
               [Node.fromJSON(newState.schema, block)]
             );
-            nextPageTransaction = newState.tr.insert(
-              newState.doc.content.size,
-              newPage
-            );
-            // .delete(
-            //   blockPosition.pos - blockPosition.parentOffset - 1,
-            //   blockPosition.pos
-            // );
+            nextPageTransaction = newState.tr
+              .insert(newState.doc.content.size, newPage)
+              .delete(
+                blockPosition.pos - blockPosition.parentOffset - 1,
+                blockPosition.pos
+              );
+
+            return nextPageTransaction;
           }
         }
         // having next page
