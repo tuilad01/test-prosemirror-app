@@ -3,6 +3,7 @@ import { pageSchema } from '../prosemirror-schema/page-schema';
 import { EditorView } from 'prosemirror-view';
 import { DOMSerializer, Fragment, Node, Schema } from 'prosemirror-model';
 import { nodes } from 'prosemirror-schema-basic';
+import { ReplaceStep } from 'prosemirror-transform';
 export function repaginate2(transaction: Transaction, pageHeightPx = 700) {
   // Flatten all blocks
   const blocks: Node[] = [];
@@ -149,6 +150,45 @@ export function measureBlockHeights(
   });
   return heights;
 }
+export function measureBlockHeights2(blocks: Node[], schema: Schema) {
+  const tempContainer = createTempContainer();
+  tempContainer.innerHTML = ''; // Clear previous content
+  const domSerializer = DOMSerializer.fromSchema(schema);
+  // editorView.someProp('domSerializer') || editorView.domSerializer;
+  const heights: { block: Node; height: number }[] = [];
+  blocks.forEach((block) => {
+    const dom = domSerializer.serializeNode(block) as Element;
+    tempContainer.appendChild(dom);
+    let height = dom.getBoundingClientRect().height;
+    if (height === 0) {
+      height = 18;
+    }
+    height += 16; // because for each p has margin 16px
+
+    heights.push({ block, height });
+  });
+  return heights;
+}
+
+export function createTempContainer() {
+  let tempContainer = document.getElementById('pm-pagination-measure');
+  if (!tempContainer) {
+    tempContainer = document.createElement('div');
+    tempContainer.id = 'pm-pagination-measure';
+    tempContainer.style.cssText = `
+            position: absolute;
+            visibility: hidden;
+            top: 0;
+            left: 0;
+            width: 595px;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: -1;
+        `;
+    document.body.appendChild(tempContainer);
+  }
+  return tempContainer;
+}
 
 // Create a custom plugin that checks for page overflow after each transaction
 export function pageBreakPlugin2(view: EditorView | undefined) {
@@ -159,15 +199,39 @@ export function pageBreakPlugin2(view: EditorView | undefined) {
       editorView = view;
       return {
         update(view, prevState) {
-          if (view.state.doc.eq(prevState.doc)) {
-            console.log('view plugin running');
-            const tr = repaginate(view.state);
-            if (tr) {
-              view.dispatch(tr);
-            }
-          }
+          // if (view.state.doc.eq(prevState.doc)) {
+          //   console.log('view plugin running');
+          //   const tr = repaginate(view.state);
+          //   if (tr) {
+          //     view.dispatch(tr);
+          //   }
+          // }
         },
       };
+    },
+
+    filterTransaction: (tr: Transaction, state: EditorState) => {
+      // check insert action
+      if (
+        tr.steps &&
+        tr.steps.length > 0 &&
+        tr.steps[0] instanceof ReplaceStep
+      ) {
+        const result = measureBlockHeights2(
+          [tr.selection.$from.parent],
+          pageSchema
+        );
+        if (result && result[0] && result[0].height > 700) {
+          alert(
+            'content too large and cannot fit the page, please split it smaller'
+          );
+          console.error(
+            "ERROR. your content's too large, please split it smaller."
+          );
+          return false;
+        }
+      }
+      return true;
     },
   });
 }

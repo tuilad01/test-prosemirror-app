@@ -19,7 +19,12 @@ import {
   repaginate,
   repaginate2,
 } from './prosemirror-plugin/page-break-plugin2';
-import { MapResult, ReplaceStep, StepMap } from 'prosemirror-transform';
+import {
+  canJoin,
+  MapResult,
+  ReplaceStep,
+  StepMap,
+} from 'prosemirror-transform';
 
 class TransactionType {
   type: 'UNKNOWN' | 'INSERT' | 'DELETE' | 'CLICK' | 'SELECT' = 'UNKNOWN';
@@ -209,7 +214,7 @@ export class AppComponent implements AfterViewInit {
         // ),
         plugins: [
           ...exampleSetup({ schema: this.mySchema }),
-          //pageBreakPlugin2(this.view),
+          pageBreakPlugin2(this.view),
         ],
       }),
       dispatchTransaction: (tr: Transaction) => {
@@ -219,6 +224,22 @@ export class AppComponent implements AfterViewInit {
         const originPosition = tr.selection.to;
 
         if (tr.docChanged) {
+          const transactionType = getTransactionType(tr);
+          if (
+            transactionType.type == 'DELETE' &&
+            tr.selection.$from.parentOffset === 0
+          ) {
+            const currentPosition = tr.selection.$from.before();
+            console.log(
+              'delete and parentosset = 0',
+              ' start inside position = ',
+              currentPosition
+            );
+            if (canJoin(tr.doc, currentPosition)) {
+              tr.join(currentPosition);
+            }
+          }
+
           const transaction = repaginate2(tr);
           if (transaction) {
             console.log(
@@ -229,7 +250,6 @@ export class AppComponent implements AfterViewInit {
             );
 
             let newCursorPosition = originPosition;
-            const transactionType = getTransactionType(tr);
             if (transactionType.type === 'INSERT') {
               newCursorPosition += transactionType.insertText!.length;
             }
@@ -261,12 +281,12 @@ export class AppComponent implements AfterViewInit {
             return;
           }
         } else {
-          console.log(
-            'cursor move from ',
-            originPosition,
-            ' to ',
-            tr.mapping.map(originPosition)
-          );
+          // console.log(
+          //   'cursor move from ',
+          //   originPosition,
+          //   ' to ',
+          //   tr.mapping.map(originPosition)
+          // );
         }
         const detail = getTransactionDetail(tr);
 
