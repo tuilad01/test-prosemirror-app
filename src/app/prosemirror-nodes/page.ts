@@ -1,8 +1,8 @@
-import { Schema, DOMParser, NodeType, NodeSpec } from 'prosemirror-model';
-import { schema } from 'prosemirror-schema-basic';
+import { NodeSpec } from 'prosemirror-model';
+
 export const pageNodeSpec: NodeSpec = {
   attrs: { 'page-number': { default: '1' } },
-  content: 'block+',
+  content: 'pageHeader pageContent pageFooter',
 
   toDOM: (node: any) => {
     return [

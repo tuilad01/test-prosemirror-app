@@ -10,9 +10,8 @@ import { Schema, DOMParser, NodeSpec } from 'prosemirror-model';
 import { schema } from 'prosemirror-schema-basic';
 import { addListNodes } from 'prosemirror-schema-list';
 import { exampleSetup } from 'prosemirror-example-setup';
-import { pageNodeSpec } from './prosemirror-nodes/page';
 import { pageBreakPlugin } from './prosemirror-plugin/page-break-plugin';
-import { pageSchema } from './prosemirror-schema/page-schema';
+import { createPage, pageSchema } from './prosemirror-schema/page-schema';
 import { Node } from 'prosemirror-model';
 import {
   pageBreakPlugin2,
@@ -25,6 +24,7 @@ import {
   ReplaceStep,
   StepMap,
 } from 'prosemirror-transform';
+import { createParagraph } from './prosemirror-nodes/paragraph';
 
 class TransactionType {
   type: 'UNKNOWN' | 'INSERT' | 'DELETE' | 'CLICK' | 'SELECT' = 'UNKNOWN';
@@ -174,6 +174,10 @@ export class AppComponent implements AfterViewInit {
   // Mix the nodes from prosemirror-schema-list into the basic schema to
   // create a schema with list support.
   ngAfterViewInit(): void {
+    const page = this.mySchema.nodes['doc'].create(null, [
+      createPage(['dat', 'truong', 'tan'].map(createParagraph), 1),
+      createPage(['dat2', 'truong2', 'tan2'].map(createParagraph), 2),
+    ]);
     const doc = Node.fromJSON(this.mySchema, {
       type: 'doc',
       content: [
@@ -205,16 +209,44 @@ export class AppComponent implements AfterViewInit {
         // },
       ],
     });
+
+    const findNextBlock = (transaction: Transaction) => {
+      const nodeAfter = Selection.findFrom(
+        transaction.doc.resolve(transaction.selection.$from.after() + 1),
+        1,
+        false
+      );
+      if (nodeAfter) {
+        console.log('next block', nodeAfter);
+        return;
+      }
+
+      console.log('next block not found');
+    };
+
+    const findPreviousBlock = (transaction: Transaction) => {
+      const previousBlock = Selection.findFrom(
+        transaction.doc.resolve(transaction.selection.$from.before() - 1),
+        -1,
+        false
+      );
+      if (previousBlock) {
+        console.log('previous block', previousBlock);
+        return;
+      }
+
+      console.log('previous block not found');
+    };
     this.view = new EditorView(document.querySelector('#editor'), {
       state: EditorState.create({
         schema: this.mySchema,
-        doc: doc,
+        doc: page,
         // doc: DOMParser.fromSchema(this.mySchema).parse(
         //   document.querySelector('#content') as Node
         // ),
         plugins: [
           ...exampleSetup({ schema: this.mySchema }),
-          pageBreakPlugin2(this.view),
+          //pageBreakPlugin2(this.view),
         ],
       }),
       dispatchTransaction: (tr: Transaction) => {
@@ -223,72 +255,74 @@ export class AppComponent implements AfterViewInit {
           newTransaction = state.tr;
         const originPosition = tr.selection.to;
 
-        if (tr.docChanged) {
-          const transactionType = getTransactionType(tr);
-          if (
-            transactionType.type == 'DELETE' &&
-            tr.selection.$from.parentOffset === 0
-          ) {
-            const currentPosition = tr.selection.$from.before();
-            console.log(
-              'delete and parentosset = 0',
-              ' start inside position = ',
-              currentPosition
-            );
-            if (canJoin(tr.doc, currentPosition)) {
-              tr.join(currentPosition);
-            }
-          }
+        findNextBlock(tr);
+        findPreviousBlock(tr);
+        // if (tr.docChanged) {
+        //   const transactionType = getTransactionType(tr);
+        //   if (
+        //     transactionType.type == 'DELETE' &&
+        //     tr.selection.$from.parentOffset === 0
+        //   ) {
+        //     const currentPosition = tr.selection.$from.before();
+        //     console.log(
+        //       'delete and parentosset = 0',
+        //       ' start inside position = ',
+        //       currentPosition
+        //     );
+        //     if (canJoin(tr.doc, currentPosition)) {
+        //       tr.join(currentPosition);
+        //     }
+        //   }
 
-          const transaction = repaginate2(tr);
-          if (transaction) {
-            console.log(
-              'cursor move from ',
-              originPosition,
-              ' to ',
-              transaction.mapping.map(originPosition)
-            );
+        //   const transaction = repaginate2(tr);
+        //   if (transaction) {
+        //     console.log(
+        //       'cursor move from ',
+        //       originPosition,
+        //       ' to ',
+        //       transaction.mapping.map(originPosition)
+        //     );
 
-            let newCursorPosition = originPosition;
-            if (transactionType.type === 'INSERT') {
-              newCursorPosition += transactionType.insertText!.length;
-            }
-            let selectionTransaction: Transaction | undefined;
+        //     let newCursorPosition = originPosition;
+        //     if (transactionType.type === 'INSERT') {
+        //       newCursorPosition += transactionType.insertText!.length;
+        //     }
+        //     let selectionTransaction: Transaction | undefined;
 
-            // if (newCursorPosition < transaction.doc.nodeSize) {
-            //   const textSelection = TextSelection.create(
-            //     transaction.doc,
-            //     newCursorPosition
-            //   );
-            //   selectionTransaction = transaction.setSelection(textSelection);
-            // }
+        //     // if (newCursorPosition < transaction.doc.nodeSize) {
+        //     //   const textSelection = TextSelection.create(
+        //     //     transaction.doc,
+        //     //     newCursorPosition
+        //     //   );
+        //     //   selectionTransaction = transaction.setSelection(textSelection);
+        //     // }
 
-            const newSelection = Selection.findFrom(
-              transaction.doc.resolve(originPosition),
-              1,
-              true
-            );
-            if (newSelection) {
-              selectionTransaction = transaction.setSelection(newSelection);
-            }
+        //     const newSelection = Selection.findFrom(
+        //       transaction.doc.resolve(originPosition),
+        //       1,
+        //       true
+        //     );
+        //     if (newSelection) {
+        //       selectionTransaction = transaction.setSelection(newSelection);
+        //     }
 
-            // TODO: update selection text (cursor)
-            view.updateState(
-              view.state.apply(
-                selectionTransaction ? selectionTransaction : transaction
-              )
-            );
-            return;
-          }
-        } else {
-          // console.log(
-          //   'cursor move from ',
-          //   originPosition,
-          //   ' to ',
-          //   tr.mapping.map(originPosition)
-          // );
-        }
-        const detail = getTransactionDetail(tr);
+        //     // TODO: update selection text (cursor)
+        //     view.updateState(
+        //       view.state.apply(
+        //         selectionTransaction ? selectionTransaction : transaction
+        //       )
+        //     );
+        //     return;
+        //   }
+        // } else {
+        //   // console.log(
+        //   //   'cursor move from ',
+        //   //   originPosition,
+        //   //   ' to ',
+        //   //   tr.mapping.map(originPosition)
+        //   // );
+        // }
+        // const detail = getTransactionDetail(tr);
 
         // Changing position of transaction if it has steps (insert/delete)
         //console.log(transactionType);
