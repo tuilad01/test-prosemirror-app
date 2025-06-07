@@ -25,7 +25,8 @@ import {
   StepMap,
 } from 'prosemirror-transform';
 import { createParagraph } from './prosemirror-nodes/paragraph';
-
+import { toggleMark } from 'prosemirror-commands';
+import { fontSizeMark } from './prosemirror-marks/font-size-mark';
 class TransactionType {
   type: 'UNKNOWN' | 'INSERT' | 'DELETE' | 'CLICK' | 'SELECT' = 'UNKNOWN';
   insertText?: string; // This only has if type = INSERT
@@ -149,7 +150,7 @@ function getTransactionDetail(transaction: Transaction): TransactionDetail {
     blockEndInsidePosition: blockEndInside,
   };
 
-  console.log(detail);
+  // console.log(detail);
   return detail;
 }
 
@@ -160,6 +161,40 @@ function getTransactionDetail(transaction: Transaction): TransactionDetail {
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements AfterViewInit {
+  fontSize = 20;
+  toggleMarkCommand(markTypeName: string) {
+    if (!this.view) {
+      return;
+    }
+    const view = this.view;
+    const state = this.view.state;
+    let tr = state.tr;
+    const marks = state.selection.$from.marks();
+    let newFontSize = '18px';
+    const existingFontSizeMark = marks.find(
+      (mark) => mark.type.name === 'fontSize'
+    );
+    if (existingFontSizeMark) {
+      newFontSize =
+        +existingFontSizeMark.attrs['fontSize'].replace('px', '') + 2 + 'px';
+      tr.removeMark(
+        state.selection.from,
+        state.selection.to,
+        state.schema.marks['fontSize']
+      );
+    }
+
+    const newFontSizeMark = state.schema.marks['fontSize'].create({
+      fontSize: newFontSize,
+    });
+
+    tr.addMark(state.selection.from, state.selection.to, newFontSizeMark);
+
+    view.dispatch(tr);
+  }
+  increaseFontSize() {
+    this.toggleMarkCommand('fontSize');
+  }
   findNextBlock() {}
   exportJSon() {
     console.log(this.view?.state.doc.toJSON());
@@ -217,11 +252,11 @@ export class AppComponent implements AfterViewInit {
         false
       );
       if (nodeAfter) {
-        console.log('next block', nodeAfter);
+        // console.log('next block', nodeAfter);
         return;
       }
 
-      console.log('next block not found');
+      // console.log('next block not found');
     };
 
     const findPreviousBlock = (transaction: Transaction) => {
@@ -231,11 +266,11 @@ export class AppComponent implements AfterViewInit {
         false
       );
       if (previousBlock) {
-        console.log('previous block', previousBlock);
+        // console.log('previous block', previousBlock);
         return;
       }
 
-      console.log('previous block not found');
+      // console.log('previous block not found');
     };
     this.view = new EditorView(document.querySelector('#editor'), {
       state: EditorState.create({
