@@ -7,5 +7,9 @@
   <button (click)="exportJSon()">export json</button>
   <button (click)="findNextBlock()">find next block</button>
   <button (click)="increaseFontSize()">increase font size</button>
+
+  <div>
+    <input type="text" [(ngModel)]="textFontSizeInput" />
+  </div>
 </div>
 <div id="editor"></div>

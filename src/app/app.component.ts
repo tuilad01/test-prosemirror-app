@@ -1,4 +1,11 @@
-import { AfterViewInit, Component } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  effect,
+  model,
+  ModelSignal,
+} from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import {
   EditorState,
   Selection,
@@ -6,7 +13,7 @@ import {
   Transaction,
 } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
-import { Schema, DOMParser, NodeSpec } from 'prosemirror-model';
+import { Schema, DOMParser, NodeSpec, Mark } from 'prosemirror-model';
 import { schema } from 'prosemirror-schema-basic';
 import { addListNodes } from 'prosemirror-schema-list';
 import { exampleSetup } from 'prosemirror-example-setup';
@@ -156,12 +163,16 @@ function getTransactionDetail(transaction: Transaction): TransactionDetail {
 
 @Component({
   selector: 'app-root',
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements AfterViewInit {
+  textFontSizeInput: ModelSignal<number | undefined> = model<
+    number | undefined
+  >();
   fontSize = 20;
+
   toggleMarkCommand(markTypeName: string) {
     if (!this.view) {
       return;
@@ -174,6 +185,16 @@ export class AppComponent implements AfterViewInit {
     const existingFontSizeMark = marks.find(
       (mark) => mark.type.name === 'fontSize'
     );
+
+    const hasFontSizeMark = state.doc.rangeHasMark(
+      state.selection.from,
+      state.selection.to,
+      state.schema.marks['fontSize']
+    );
+
+    if (hasFontSizeMark) {
+      console.log('has fontSize mark');
+    }
     if (existingFontSizeMark) {
       newFontSize =
         +existingFontSizeMark.attrs['fontSize'].replace('px', '') + 2 + 'px';
@@ -189,7 +210,10 @@ export class AppComponent implements AfterViewInit {
     });
 
     tr.addMark(state.selection.from, state.selection.to, newFontSizeMark);
+    //tr.setSelection(state.selection);
+    // const newSelection = new TextSelection(tr.doc.resolve(state.selection.to));
 
+    // tr.setSelection(newSelection);
     view.dispatch(tr);
   }
   increaseFontSize() {
@@ -205,7 +229,12 @@ export class AppComponent implements AfterViewInit {
   /**
    *
    */
-  constructor() {}
+  constructor() {
+    effect(() => {
+      const textFontSizeInput = this.textFontSizeInput();
+      console.log(textFontSizeInput);
+    });
+  }
   // Mix the nodes from prosemirror-schema-list into the basic schema to
   // create a schema with list support.
   ngAfterViewInit(): void {
@@ -289,9 +318,61 @@ export class AppComponent implements AfterViewInit {
           { state } = view,
           newTransaction = state.tr;
         const originPosition = tr.selection.to;
+        const defaultFontSize = 16;
 
-        findNextBlock(tr);
-        findPreviousBlock(tr);
+        if (tr.selection.from != tr.selection.to) {
+          // user's selecting a range
+          // getting all fontSize mark to figure out current font size.
+
+          const marks = this.findAllMarks(
+            tr.selection.from,
+            tr.selection.to,
+            tr.doc
+          );
+          console.log('marks', marks);
+          //const fontSizeMarks = marks.filter(mark => mark?.type.name === 'fontSize');
+
+          let selectionFontSize: number | null = null;
+
+          if (marks.length > 1) {
+            const selectionFontSizes: number[] = [];
+
+            for (let index = 0; index < marks.length; index++) {
+              const mark = marks[index];
+              selectionFontSizes.push(
+                mark ? this.getMarkFontSize(mark) : defaultFontSize
+              );
+            }
+
+            selectionFontSize = selectionFontSizes.every(
+              (fontSize) => fontSize === selectionFontSizes[0]
+            )
+              ? selectionFontSizes[0]
+              : null;
+          } else {
+            const firstMark = marks[0];
+            selectionFontSize = firstMark
+              ? +firstMark.attrs['fontSize'].replace('px', '')
+              : defaultFontSize;
+          }
+
+          this.textFontSizeInput.set(
+            selectionFontSize !== null ? selectionFontSize : undefined
+          );
+        } else {
+          const fontSizeMark = tr.selection.$to
+            .marks()
+            .find((mark) => mark.type.name === 'fontSize');
+
+          this.textFontSizeInput.set(
+            fontSizeMark
+              ? +fontSizeMark.attrs['fontSize'].replace('px', '')
+              : defaultFontSize
+          );
+        }
+
+        //findNextBlock(tr);
+        //findPreviousBlock(tr);
         // if (tr.docChanged) {
         //   const transactionType = getTransactionType(tr);
         //   if (
@@ -382,6 +463,23 @@ export class AppComponent implements AfterViewInit {
     //     this.view?.posAtDOM(event.target as any, 0, -1)
     //   );
     // });
+  }
+
+  findAllMarks(from: number, to: number, doc: Node) {
+    const marks: (Mark | null)[] = [];
+    doc.nodesBetween(from, to, (node, pos) => {
+      if (node.isInline) {
+        if (node.marks.length > 0) {
+          marks.push(...node.marks);
+        } else {
+          marks.push(null);
+        }
+      }
+    });
+    return marks;
+  }
+  getMarkFontSize(markFontSize: Mark): number {
+    return +markFontSize.attrs['fontSize'].replace('px', '');
   }
 
   insertNewPage() {
