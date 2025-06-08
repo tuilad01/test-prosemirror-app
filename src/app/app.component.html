@@ -9,7 +9,16 @@
   <button (click)="increaseFontSize()">increase font size</button>
 
   <div>
-    <input type="text" [(ngModel)]="textFontSizeInput" />
+    <input
+      type="text"
+      [(ngModel)]="textFontSizeInput"
+      (keyup)="handleEnter($event)"
+    />
+    <input
+      type="text"
+      [(ngModel)]="textFontFamilyInput"
+      (keyup)="handleEnterFontFamily($event)"
+    />
   </div>
 </div>
 <div id="editor"></div>

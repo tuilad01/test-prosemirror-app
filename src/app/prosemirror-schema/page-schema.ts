@@ -7,6 +7,7 @@ import { contentNodeSpec } from '../prosemirror-nodes/page-content';
 import { footerNodeSpec } from '../prosemirror-nodes/page-footer';
 import { Node } from 'prosemirror-model';
 import { fontSizeMark } from '../prosemirror-marks/font-size-mark';
+import { fontFamilyMark } from '../prosemirror-marks/font-family-mark';
 
 const existingDocNodeSpec = { ...schema.spec.nodes.get('doc') };
 existingDocNodeSpec.content = 'page+';
@@ -24,7 +25,9 @@ const pageSchemaNodes = addListNodes(
 
 export const pageSchema = new Schema({
   nodes: pageSchemaNodes,
-  marks: schema.spec.marks.addToEnd('fontSize', fontSizeMark),
+  marks: schema.spec.marks
+    .addToEnd('fontFamily', fontFamilyMark)
+    .addToEnd('fontSize', fontSizeMark),
 });
 
 export function createPage(blocks: Node[], pageNumber: number) {

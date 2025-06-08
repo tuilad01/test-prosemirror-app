@@ -168,10 +168,60 @@ function getTransactionDetail(transaction: Transaction): TransactionDetail {
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements AfterViewInit {
+  textFontFamilyInput = model<string | undefined>();
   textFontSizeInput: ModelSignal<number | undefined> = model<
     number | undefined
   >();
   fontSize = 20;
+
+  handleEnterFontFamily(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      const { value } = event.currentTarget as any;
+
+      if (!this.view) {
+        return;
+      }
+
+      const view = this.view;
+      const state = this.view.state;
+      let tr = state.tr;
+      const { from, to } = state.selection;
+      const fontFamilyMark = state.schema.marks['fontFamily'];
+
+      if (state.doc.rangeHasMark(from, to, fontFamilyMark)) {
+        tr.removeMark(from, to, fontFamilyMark);
+      }
+
+      tr.addMark(from, to, fontFamilyMark.create({ fontFamily: value }));
+
+      view.dispatch(tr);
+    }
+  }
+
+  handleEnter(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      const { value } = event.currentTarget as any;
+
+      if (!this.view) {
+        return;
+      }
+
+      const view = this.view;
+      const state = this.view.state;
+      let tr = state.tr;
+      const { from, to } = state.selection;
+      const fontSizeMark = state.schema.marks['fontSize'];
+
+      if (state.doc.rangeHasMark(from, to, fontSizeMark)) {
+        tr.removeMark(from, to, fontSizeMark);
+      }
+      if (value !== '16') {
+        tr.addMark(from, to, fontSizeMark.create({ fontSize: value + 'px' }));
+      }
+
+      view.dispatch(tr);
+    }
+  }
 
   toggleMarkCommand(markTypeName: string) {
     if (!this.view) {
@@ -340,7 +390,9 @@ export class AppComponent implements AfterViewInit {
             for (let index = 0; index < marks.length; index++) {
               const mark = marks[index];
               selectionFontSizes.push(
-                mark ? this.getMarkFontSize(mark) : defaultFontSize
+                mark && mark.type.name === 'fontSize'
+                  ? this.getMarkFontSize(mark)
+                  : defaultFontSize
               );
             }
 
@@ -351,9 +403,11 @@ export class AppComponent implements AfterViewInit {
               : null;
           } else {
             const firstMark = marks[0];
-            selectionFontSize = firstMark
-              ? +firstMark.attrs['fontSize'].replace('px', '')
-              : defaultFontSize;
+            if (firstMark?.type.name === 'fontSize') {
+              selectionFontSize = firstMark
+                ? +firstMark.attrs['fontSize'].replace('px', '')
+                : defaultFontSize;
+            }
           }
 
           this.textFontSizeInput.set(
@@ -363,12 +417,13 @@ export class AppComponent implements AfterViewInit {
           const fontSizeMark = tr.selection.$to
             .marks()
             .find((mark) => mark.type.name === 'fontSize');
-
-          this.textFontSizeInput.set(
-            fontSizeMark
-              ? +fontSizeMark.attrs['fontSize'].replace('px', '')
-              : defaultFontSize
-          );
+          if (fontSizeMark) {
+            this.textFontSizeInput.set(
+              fontSizeMark
+                ? +fontSizeMark.attrs['fontSize'].replace('px', '')
+                : defaultFontSize
+            );
+          }
         }
 
         //findNextBlock(tr);
