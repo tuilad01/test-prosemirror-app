@@ -1,0 +1,34 @@
+<!-- <div id="content">
+  <div class="page" page-number="1">Hello</div>
+</div> -->
+
+<div>
+  <button (click)="insertNewPage()">Insert new page</button>
+  <button (click)="exportJSon()">export json</button>
+  <button (click)="findNextBlock()">find next block</button>
+  <button (click)="increaseFontSize()">increase font size</button>
+  <button (click)="keepFocus()">keep focus</button>
+  <button (click)="navigate()">
+    navigate itselfstasdasd ss sssasd asdasd asds asdssdss s
+  </button>
+
+  <button (click)="insertImage()">insert image</button>
+  <div>
+    <input
+      type="text"
+      [(ngModel)]="textFontSizeInput"
+      (keyup)="handleEnter($event)"
+    />
+    <input
+      type="text"
+      [(ngModel)]="textFontFamilyInput"
+      (keyup)="handleEnterFontFamily($event)"
+    />
+  </div>
+</div>
+
+<div #editor id="editor"></div>
+
+<div class="display-index">
+  {{ index }}
+</div>

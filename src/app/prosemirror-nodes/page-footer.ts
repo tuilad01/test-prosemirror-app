@@ -2,10 +2,7 @@ import { NodeSpec } from 'prosemirror-model';
 
 export const footerNodeSpec: NodeSpec = {
   attrs: { class: { default: 'footer' } },
-  content: 'inline*',
-  selectable: false,
-  draggable: false,
-  atom: true,
+  content: 'block*',
 
   toDOM: (node: any) => {
     return [

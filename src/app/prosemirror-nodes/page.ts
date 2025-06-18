@@ -2,7 +2,7 @@ import { NodeSpec } from 'prosemirror-model';
 
 export const pageNodeSpec: NodeSpec = {
   attrs: { 'page-number': { default: '1' } },
-  content: 'pageHeader pageContent pageFooter',
+  content: 'pageContent pageFooter',
 
   toDOM: (node: any) => {
     return [

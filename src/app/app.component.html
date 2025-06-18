@@ -1,24 +1,2 @@
-<!-- <div id="content">
-  <div class="page" page-number="1">Hello</div>
-</div> -->
-
-<div>
-  <button (click)="insertNewPage()">Insert new page</button>
-  <button (click)="exportJSon()">export json</button>
-  <button (click)="findNextBlock()">find next block</button>
-  <button (click)="increaseFontSize()">increase font size</button>
-
-  <div>
-    <input
-      type="text"
-      [(ngModel)]="textFontSizeInput"
-      (keyup)="handleEnter($event)"
-    />
-    <input
-      type="text"
-      [(ngModel)]="textFontFamilyInput"
-      (keyup)="handleEnterFontFamily($event)"
-    />
-  </div>
-</div>
-<div id="editor"></div>
+<!-- <router-outlet></router-outlet> -->
+<app-editor></app-editor>

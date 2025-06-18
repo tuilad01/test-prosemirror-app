@@ -2,10 +2,7 @@ import { NodeSpec } from 'prosemirror-model';
 
 export const headerNodeSpec: NodeSpec = {
   attrs: { class: { default: 'header' } },
-  content: 'inline*',
-  selectable: false,
-  draggable: false,
-  atom: true,
+  content: 'block*',
 
   toDOM: (node: any) => {
     return [
