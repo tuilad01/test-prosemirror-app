@@ -166,7 +166,7 @@ function getTransactionDetail(transaction: Transaction): TransactionDetail {
 
 @Component({
   selector: 'app-root',
-  imports: [FormsModule, RouterOutlet,EditorComponent],
+  imports: [FormsModule, EditorComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })

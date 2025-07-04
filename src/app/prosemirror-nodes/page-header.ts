@@ -1,14 +1,18 @@
 import { NodeSpec } from 'prosemirror-model';
 
+export const headerNodeName = 'page_header_2';
+const className = 'page-header';
+
 export const headerNodeSpec: NodeSpec = {
-  attrs: { class: { default: 'header' } },
+  attrs: { class: { default: className } },
   content: 'block*',
+  group: 'block',
 
   toDOM: (node: any) => {
     return [
       'div',
       {
-        class: 'header',
+        class: className,
       },
       0,
     ];
@@ -16,11 +20,7 @@ export const headerNodeSpec: NodeSpec = {
 
   parseDOM: [
     {
-      tag: 'div.header',
-      getAttrs: (dom: HTMLElement) => {
-        const text = dom.textContent;
-        return { text };
-      },
+      tag: `div.${className}`,
     },
   ],
 };

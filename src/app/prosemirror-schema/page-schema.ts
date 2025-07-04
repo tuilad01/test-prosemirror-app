@@ -1,14 +1,13 @@
 import { schema } from 'prosemirror-schema-basic';
 import { addListNodes } from 'prosemirror-schema-list';
-import { pageNodeSpec } from '../prosemirror-nodes/page';
 import { Fragment, Schema } from 'prosemirror-model';
-import { headerNodeSpec } from '../prosemirror-nodes/page-header';
-import { contentNodeSpec } from '../prosemirror-nodes/page-content';
-import { footerNodeSpec } from '../prosemirror-nodes/page-footer';
 import { Node } from 'prosemirror-model';
 import { fontSizeMark } from '../prosemirror-marks/font-size-mark';
 import { fontFamilyMark } from '../prosemirror-marks/font-family-mark';
-import { customImageNode } from '@app/prosemirror-nodes/custom-image';
+import {
+  imageBlockNodeName,
+  imageBlockNodeSpec,
+} from '@app/prosemirror-nodes/image-block';
 
 const existingDocNodeSpec = { ...schema.spec.nodes.get('doc') };
 existingDocNodeSpec.content = 'page+';
@@ -17,13 +16,15 @@ const pageSchemaNodes = addListNodes(
   'paragraph block*',
   'block'
 )
-  .addBefore('paragraph', 'page', pageNodeSpec)
-  // .addBefore('paragraph', 'pageHeader', headerNodeSpec)
-  .addBefore('paragraph', 'pageContent', contentNodeSpec)
-  .addBefore('paragraph', 'pageFooter', footerNodeSpec)
-  .update('image', customImageNode)
-  // updating doc content to page NodeSpec
-  .update('doc', existingDocNodeSpec, 'doc');
+  //.addBefore('paragraph', 'page', pageNodeSpec)
+  .addToEnd(imageBlockNodeName, imageBlockNodeSpec);
+//.addBefore('paragraph', headerNodeName, headerNodeSpec)
+//.addBefore('paragraph', 'pageContent', contentNodeSpec)
+//.addBefore('paragraph', 'pageFooter', footerNodeSpec)
+//.addBefore('paragraph', editableHeaderNodeName, editableHeaderNode);
+//.update('image', customImageNode)
+// updating doc content to page NodeSpec
+//.update('doc', existingDocNodeSpec, 'doc');
 
 export const pageSchema = new Schema({
   nodes: pageSchemaNodes,

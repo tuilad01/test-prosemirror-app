@@ -11,6 +11,7 @@ import {
   ModelSignal,
   OnDestroy,
   viewChild,
+  ViewEncapsulation,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
@@ -45,6 +46,18 @@ import { selectionPlugin } from '@app/prosemirror-plugin/selection-plugin';
 import { Router } from '@angular/router';
 import { FooterNodeView } from '@app/prosemirror-nodes/footer-nodeview';
 import { ResizableImageView } from '@app/prosemirror-nodes/custom-image';
+import {
+  editableHeaderNodeName,
+  EditableHeaderNodeView,
+} from '@app/prosemirror-nodes/editable-header-nodeview';
+import { footerPlugin } from '@app/prosemirror-plugin/footer-plugin';
+import { headerNodeName } from '@app/prosemirror-nodes/page-header';
+import { decorationPlugin } from '@app/prosemirror-plugin/decoration-plugin';
+import {
+  imageBlockNodeName,
+  ImageBlockNodeView,
+} from '@app/prosemirror-nodes/image-block';
+
 class TransactionType {
   type: 'UNKNOWN' | 'INSERT' | 'DELETE' | 'CLICK' | 'SELECT' = 'UNKNOWN';
   insertText?: string; // This only has if type = INSERT
@@ -177,8 +190,43 @@ function getTransactionDetail(transaction: Transaction): TransactionDetail {
   imports: [FormsModule],
   templateUrl: './editor.component.html',
   styleUrl: './editor.component.scss',
+  encapsulation: ViewEncapsulation.None,
 })
 export class EditorComponent implements OnDestroy {
+  handleInsertHeader() {
+    if (!this.view) {
+      return;
+    }
+    const { state, dispatch } = this.view;
+    const { tr, selection } = state;
+    const headerNodeType = state.schema.nodes[headerNodeName];
+    const headerNode = headerNodeType.create(null, [
+      state.schema.nodes['paragraph'].create(null, state.schema.text('123')),
+    ]);
+
+    //console.log(selection.$from.after());
+
+    dispatch(tr.insert(selection.from, headerNode));
+  }
+  handleInsertEditableHeader() {
+    if (!this.view) {
+      return;
+    }
+    const { state, dispatch } = this.view;
+    const { tr, selection } = state;
+    const editableHeaderNodeType = state.schema.nodes[editableHeaderNodeName];
+    const editableHeaderNode = editableHeaderNodeType.create(
+      {
+        content: 'truong tan dat [variable1]',
+        data: [{ variable1: '123' }],
+      },
+      [state.schema.nodes['paragraph'].create(null, state.schema.text('123'))]
+    );
+
+    //console.log(selection.$from.after());
+
+    dispatch(tr.insert(selection.$from.after(), editableHeaderNode));
+  }
   insertImage() {
     this.view?.dispatch(
       this.view.state.tr.replaceSelectionWith(
@@ -341,40 +389,100 @@ export class EditorComponent implements OnDestroy {
     this.initEditor();
   }
   initEditor() {
-    const page = this.mySchema.nodes['doc'].create(null, [
-      createPage(['dat', 'truong', 'tan'].map(createParagraph), 1),
-      createPage(['dat2', 'truong2', 'tan2'].map(createParagraph), 2),
-    ]);
+    // const page = this.mySchema.nodes['doc'].create(null, [
+    //   createPage(['dat', 'truong', 'tan'].map(createParagraph), 1),
+    //   createPage(['dat2', 'truong2', 'tan2'].map(createParagraph), 2),
+    // ]);
+
     const doc = Node.fromJSON(this.mySchema, {
       type: 'doc',
       content: [
         {
-          type: 'page',
-          attrs: { 'page-number': '1' },
+          type: 'paragraph',
           content: [
             {
-              type: 'paragraph',
-              content: [
-                {
-                  type: 'text',
-                  text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. blandit lorem in auctor egestas. In vehicula, lorem ac tempus lacinia, velit mauris dignissim odio, venenatis faucibus eros lorem accumsan mauris. Maecenas risus nisl, aliquet id mi eu, iaculis mattis ante. Aliquam nec tincidunt felis, vitae venenatis ligula. Integer eleifend, justo ac mattis sagittis, tortor lorem ornare nibh, at tempor enim nisi vitae diam. Praesent venenatis commodo orci a tristique. Nulla ex nibh, laoreet ut quam quis, rhoncus faucibus magna.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam blandit arcu ut odio iaculis, eu facilisis massa varius. Praesent dolor nibh, laoreet ac nisi id, placerat gravida justo. Quisque ac felis dictum nulla ornare posuere. Interdum et malesuada fames ac ante ipsum primis in faucibus. Quisque pretium lacinia justo quis hendrerit. Phasellus tortor risus, dapibus sed nunc ut, lacinia lobortis turpis. Praesent porttitor leo at libero dapibus auctor. Sed ac molestie tellus. Etiam ultrices magna quis pulvinar blandit. Phasellus bibendum consequat tincidunt. Quisque sed sem sed lacus volutpat placerat. Sed nisi lacus, aliquet ac lobortis ut, iaculis quis ipsum. Nam sagittis tortor sit amet scelerisque vulputate. Aenean mollis et enim at ultricies. Etiam ac sollicitudin elit, eget sollicitudin ligula. Integer id urna vehicula, cursus mauris sit amet, tristique lacus. Nunc faucibus ex nec enim dapibus vehicula. Nunc at leo laoreet, pharetra lacus ut, ultricies urna. Cras vitae finibus tellus. Praesent quis nunc id purus gravida tempor. Fusce ac felis venenatis, luctus arcu elementum, tempor neque. Nullam ut erat id purus tincidunt dictum. Curabitur imperdiet vel augue nec ornare. In hac habitasse platea dictumst. Proin pulvinar augue sapien, eget porttitor tellus pharetra ac. Nam sit amet nunc et lectus sodales dictum non ut leo. Maecenas vestibulum justo nec lacinia rutrum. Maecenas in fermentum lectus, sed aliquam ipsum. Aliquam interdum sollicitudin mi, vel placerat magna commodo et. Nunc sit amet est mauris. Nam accumsan ullamcorper tortor et mollis. Nunc accumsan est nec varius pulvinar. Vivamus feugiat volutpat tortor non volutpat. Mauris et felis in justo porttitor maximus faucibus sed enim. Etiam imperdiet sed turpis et vulputate. Morbi posuere ex nec dui vulputate, sed consequat felis venenatis. Duis consectetur sodales arcu. Pellentesque laoreet malesuada nunc nec rutrum. Suspendisse tincidunt sed nunc vitae varius. Ut pellentesque ipsum ac pulvinar porttitor. Duis et elit a odio auctor venenatis. Curabitur sit amet leo et magna fermentum accumsan. Pellentesque interdum hendrerit ex et vulputate. Suspendisse condimentum aliquet mi at placerat. Aliquam dapibus magna ut urna euismod, congue condimentum nibh scelerisque. Nam iaculis lobortis nisi, nec facilisis lorem rhoncus nec. Aenean blandit lorem in auctor egestas. In vehicula, lorem ac tempus lacinia, velit mauris dignissim odio, venenatis faucibus eros lorem accumsan mauris. Maecenas risus nisl, aliquet id mi eu, iaculis mattis ante. Aliquam nec tincidun',
-                },
-              ],
+              type: 'text',
+              text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+            },
+          ],
+        },
+        {
+          type: imageBlockNodeName,
+        },
+        {
+          type: imageBlockNodeName,
+        },
+        {
+          type: imageBlockNodeName,
+        },
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
             },
           ],
         },
         // {
-        //   type: 'page',
-        //   attrs: { 'page-number': '2' },
+        //   type: editableHeaderNodeName,
+        //   attrs: {
+        //     content: 'Header non-editable [variable1]',
+        //     data: 'variable1',
+        //   },
         //   content: [
         //     {
         //       type: 'paragraph',
-        //       content: [{ type: 'text', text: 'page 2' }],
+        //       content: [
+        //         {
+        //           type: 'text',
+        //           text: 'Dat Truong Tan',
+        //         },
+        //       ],
         //     },
         //   ],
         // },
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'orem ac tempus lacinia, velit mauris dignissim odio, venenatis faucibus eros lorem accumsan mauris. Ma',
+            },
+          ],
+        },
       ],
     });
+    // const doc = Node.fromJSON(this.mySchema, {
+    //   type: 'doc',
+    //   content: [
+    //     {
+    //       type: 'page',
+    //       attrs: { 'page-number': '1' },
+    //       content: [
+    //         {
+    //           type: 'paragraph',
+    //           content: [
+    //             {
+    //               type: 'text',
+    //               text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. blandit lorem in auctor egestas. In vehicula, lorem ac tempus lacinia, velit mauris dignissim odio, venenatis faucibus eros lorem accumsan mauris. Maecenas risus nisl, aliquet id mi eu, iaculis mattis ante. Aliquam nec tincidunt felis, vitae venenatis ligula. Integer eleifend, justo ac mattis sagittis, tortor lorem ornare nibh, at tempor enim nisi vitae diam. Praesent venenatis commodo orci a tristique. Nulla ex nibh, laoreet ut quam quis, rhoncus faucibus magna.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam blandit arcu ut odio iaculis, eu facilisis massa varius. Praesent dolor nibh, laoreet ac nisi id, placerat gravida justo. Quisque ac felis dictum nulla ornare posuere. Interdum et malesuada fames ac ante ipsum primis in faucibus. Quisque pretium lacinia justo quis hendrerit. Phasellus tortor risus, dapibus sed nunc ut, lacinia lobortis turpis. Praesent porttitor leo at libero dapibus auctor. Sed ac molestie tellus. Etiam ultrices magna quis pulvinar blandit. Phasellus bibendum consequat tincidunt. Quisque sed sem sed lacus volutpat placerat. Sed nisi lacus, aliquet ac lobortis ut, iaculis quis ipsum. Nam sagittis tortor sit amet scelerisque vulputate. Aenean mollis et enim at ultricies. Etiam ac sollicitudin elit, eget sollicitudin ligula. Integer id urna vehicula, cursus mauris sit amet, tristique lacus. Nunc faucibus ex nec enim dapibus vehicula. Nunc at leo laoreet, pharetra lacus ut, ultricies urna. Cras vitae finibus tellus. Praesent quis nunc id purus gravida tempor. Fusce ac felis venenatis, luctus arcu elementum, tempor neque. Nullam ut erat id purus tincidunt dictum. Curabitur imperdiet vel augue nec ornare. In hac habitasse platea dictumst. Proin pulvinar augue sapien, eget porttitor tellus pharetra ac. Nam sit amet nunc et lectus sodales dictum non ut leo. Maecenas vestibulum justo nec lacinia rutrum. Maecenas in fermentum lectus, sed aliquam ipsum. Aliquam interdum sollicitudin mi, vel placerat magna commodo et. Nunc sit amet est mauris. Nam accumsan ullamcorper tortor et mollis. Nunc accumsan est nec varius pulvinar. Vivamus feugiat volutpat tortor non volutpat. Mauris et felis in justo porttitor maximus faucibus sed enim. Etiam imperdiet sed turpis et vulputate. Morbi posuere ex nec dui vulputate, sed consequat felis venenatis. Duis consectetur sodales arcu. Pellentesque laoreet malesuada nunc nec rutrum. Suspendisse tincidunt sed nunc vitae varius. Ut pellentesque ipsum ac pulvinar porttitor. Duis et elit a odio auctor venenatis. Curabitur sit amet leo et magna fermentum accumsan. Pellentesque interdum hendrerit ex et vulputate. Suspendisse condimentum aliquet mi at placerat. Aliquam dapibus magna ut urna euismod, congue condimentum nibh scelerisque. Nam iaculis lobortis nisi, nec facilisis lorem rhoncus nec. Aenean blandit lorem in auctor egestas. In vehicula, lorem ac tempus lacinia, velit mauris dignissim odio, venenatis faucibus eros lorem accumsan mauris. Maecenas risus nisl, aliquet id mi eu, iaculis mattis ante. Aliquam nec tincidun',
+    //             },
+    //           ],
+    //         },
+    //       ],
+    //     },
+    //     // {
+    //     //   type: 'page',
+    //     //   attrs: { 'page-number': '2' },
+    //     //   content: [
+    //     //     {
+    //     //       type: 'paragraph',
+    //     //       content: [{ type: 'text', text: 'page 2' }],
+    //     //     },
+    //     //   ],
+    //     // },
+    //   ],
+    // });
 
     const findNextBlock = (transaction: Transaction) => {
       const nodeAfter = Selection.findFrom(
@@ -413,21 +521,29 @@ export class EditorComponent implements OnDestroy {
     this.view = new EditorView(editorElements[editorElements.length - 1], {
       state: EditorState.create({
         schema: this.mySchema,
-        doc: page,
+        doc: doc,
         // doc: DOMParser.fromSchema(this.mySchema).parse(
         //   document.querySelector('#content') as Node
         // ),
         plugins: [
           ...exampleSetup({ schema: this.mySchema }),
           selectionPlugin(this.view),
+          //footerPlugin,
+          decorationPlugin,
           //pageBreakPlugin2(this.view),
         ],
       }),
       nodeViews: {
         // pageFooter: (node, view, getPos, decorations) =>
         //   new FooterNodeView(node, view, getPos, decorations),
-        image: (node, view, getPos, decorations) =>
-          new ResizableImageView(node, view, getPos, decorations),
+        // image: (node, view, getPos, decorations) =>
+        //   new ResizableImageView(node, view, getPos, decorations),
+        // [editableHeaderNodeName]: (node, view, getPos, decorations) => {
+        //   return new EditableHeaderNodeView(node, view, getPos, decorations);
+        // },
+        [imageBlockNodeName]: (node, view, getPos, decorations) => {
+          return new ImageBlockNodeView(node, view, getPos, decorations);
+        },
       },
       dispatchTransaction: (tr: Transaction) => {
         const view = this.view!,
@@ -469,17 +585,17 @@ export class EditorComponent implements OnDestroy {
 
         // detect bold
 
-        const { $cursor, from, to } = tr.selection as TextSelection;
-        const boldMark = state.schema.marks['strong'];
-        const boldMarks: any[] = [];
-        tr.doc.nodesBetween(from, to, (node) => {
-          if (node.isText) {
-            const bold = node.marks.find(
-              (mark) => mark.type.name === boldMark.name
-            );
-            boldMarks.push(bold);
-          }
-        });
+        // const { $cursor, from, to } = tr.selection as TextSelection;
+        // const boldMark = state.schema.marks['strong'];
+        // const boldMarks: any[] = [];
+        // tr.doc.nodesBetween(from, to, (node) => {
+        //   if (node.isText) {
+        //     const bold = node.marks.find(
+        //       (mark) => mark.type.name === boldMark.name
+        //     );
+        //     boldMarks.push(bold);
+        //   }
+        // });
         // uncomment to see bold mark
         // console.log(boldMarks);
         // console.log(
@@ -489,61 +605,61 @@ export class EditorComponent implements OnDestroy {
         //     : boldMarks.every((d) => d === boldMarks[0])
         // );
 
-        if (tr.selection.from != tr.selection.to) {
-          // user's selecting a range
-          // getting all fontSize mark to figure out current font size.
+        // if (tr.selection.from != tr.selection.to) {
+        //   // user's selecting a range
+        //   // getting all fontSize mark to figure out current font size.
 
-          const marks = this.findAllMarks(
-            tr.selection.from,
-            tr.selection.to,
-            tr.doc
-          );
-          //console.log('marks', marks);
-          //const fontSizeMarks = marks.filter(mark => mark?.type.name === 'fontSize');
+        //   const marks = this.findAllMarks(
+        //     tr.selection.from,
+        //     tr.selection.to,
+        //     tr.doc
+        //   );
+        //   //console.log('marks', marks);
+        //   //const fontSizeMarks = marks.filter(mark => mark?.type.name === 'fontSize');
 
-          let selectionFontSize: number | null = null;
+        //   let selectionFontSize: number | null = null;
 
-          if (marks.length > 1) {
-            const selectionFontSizes: number[] = [];
+        //   if (marks.length > 1) {
+        //     const selectionFontSizes: number[] = [];
 
-            for (let index = 0; index < marks.length; index++) {
-              const mark = marks[index];
-              selectionFontSizes.push(
-                mark && mark.type.name === 'fontSize'
-                  ? this.getMarkFontSize(mark)
-                  : defaultFontSize
-              );
-            }
+        //     for (let index = 0; index < marks.length; index++) {
+        //       const mark = marks[index];
+        //       selectionFontSizes.push(
+        //         mark && mark.type.name === 'fontSize'
+        //           ? this.getMarkFontSize(mark)
+        //           : defaultFontSize
+        //       );
+        //     }
 
-            selectionFontSize = selectionFontSizes.every(
-              (fontSize) => fontSize === selectionFontSizes[0]
-            )
-              ? selectionFontSizes[0]
-              : null;
-          } else {
-            const firstMark = marks[0];
-            if (firstMark?.type.name === 'fontSize') {
-              selectionFontSize = firstMark
-                ? +firstMark.attrs['fontSize'].replace('px', '')
-                : defaultFontSize;
-            }
-          }
+        //     selectionFontSize = selectionFontSizes.every(
+        //       (fontSize) => fontSize === selectionFontSizes[0]
+        //     )
+        //       ? selectionFontSizes[0]
+        //       : null;
+        //   } else {
+        //     const firstMark = marks[0];
+        //     if (firstMark?.type.name === 'fontSize') {
+        //       selectionFontSize = firstMark
+        //         ? +firstMark.attrs['fontSize'].replace('px', '')
+        //         : defaultFontSize;
+        //     }
+        //   }
 
-          this.textFontSizeInput.set(
-            selectionFontSize !== null ? selectionFontSize : undefined
-          );
-        } else {
-          const fontSizeMark = tr.selection.$to
-            .marks()
-            .find((mark) => mark.type.name === 'fontSize');
-          if (fontSizeMark) {
-            this.textFontSizeInput.set(
-              fontSizeMark
-                ? +fontSizeMark.attrs['fontSize'].replace('px', '')
-                : defaultFontSize
-            );
-          }
-        }
+        //   this.textFontSizeInput.set(
+        //     selectionFontSize !== null ? selectionFontSize : undefined
+        //   );
+        // } else {
+        //   const fontSizeMark = tr.selection.$to
+        //     .marks()
+        //     .find((mark) => mark.type.name === 'fontSize');
+        //   if (fontSizeMark) {
+        //     this.textFontSizeInput.set(
+        //       fontSizeMark
+        //         ? +fontSizeMark.attrs['fontSize'].replace('px', '')
+        //         : defaultFontSize
+        //     );
+        //   }
+        // }
 
         //findNextBlock(tr);
         //findPreviousBlock(tr);
