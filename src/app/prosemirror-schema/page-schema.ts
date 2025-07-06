@@ -8,6 +8,14 @@ import {
   imageBlockNodeName,
   imageBlockNodeSpec,
 } from '@app/prosemirror-nodes/image-block';
+import {
+  customListNodeName,
+  customListNodeSpec,
+} from '@app/prosemirror-nodes/custom-list';
+import {
+  customListItemNodeName,
+  customListItemNodeSpec,
+} from '@app/prosemirror-nodes/custom-list-item';
 
 const existingDocNodeSpec = { ...schema.spec.nodes.get('doc') };
 existingDocNodeSpec.content = 'page+';
@@ -17,7 +25,9 @@ const pageSchemaNodes = addListNodes(
   'block'
 )
   //.addBefore('paragraph', 'page', pageNodeSpec)
-  .addToEnd(imageBlockNodeName, imageBlockNodeSpec);
+  .addToEnd(imageBlockNodeName, imageBlockNodeSpec)
+  .addToEnd(customListNodeName, customListNodeSpec)
+  .addToEnd(customListItemNodeName, customListItemNodeSpec);
 //.addBefore('paragraph', headerNodeName, headerNodeSpec)
 //.addBefore('paragraph', 'pageContent', contentNodeSpec)
 //.addBefore('paragraph', 'pageFooter', footerNodeSpec)

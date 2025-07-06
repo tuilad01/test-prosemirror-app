@@ -13,7 +13,6 @@ export const imageBlockNodeSpec: NodeSpec = {
   group: 'block',
   content: 'image? text*',
   isolating: true,
-  selectable: true,
   attrs: {
     src: { default: '' },
   },

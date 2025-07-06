@@ -57,6 +57,8 @@ import {
   imageBlockNodeName,
   ImageBlockNodeView,
 } from '@app/prosemirror-nodes/image-block';
+import { customListNodeName } from '@app/prosemirror-nodes/custom-list';
+import { customListItemNodeName } from '@app/prosemirror-nodes/custom-list-item';
 
 class TransactionType {
   type: 'UNKNOWN' | 'INSERT' | 'DELETE' | 'CLICK' | 'SELECT' = 'UNKNOWN';
@@ -414,6 +416,11 @@ export class EditorComponent implements OnDestroy {
         },
         {
           type: imageBlockNodeName,
+        },
+        {
+          type: customListNodeName,
+          attrs: { column: 3 },
+          content: [{ type: customListItemNodeName }],
         },
         {
           type: 'paragraph',
