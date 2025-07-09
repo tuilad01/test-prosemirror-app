@@ -58,7 +58,13 @@ import {
   ImageBlockNodeView,
 } from '@app/prosemirror-nodes/image-block';
 import { customListNodeName } from '@app/prosemirror-nodes/custom-list';
-import { customListItemNodeName } from '@app/prosemirror-nodes/custom-list-item';
+import {
+  customListItemNodeName,
+  customListItemNodeView,
+  handleArrowLeftChecklistCommand,
+  removeEmptyListItemAndInsertParagraph,
+} from '@app/prosemirror-nodes/custom-list-item';
+import { keymap } from 'prosemirror-keymap';
 
 class TransactionType {
   type: 'UNKNOWN' | 'INSERT' | 'DELETE' | 'CLICK' | 'SELECT' = 'UNKNOWN';
@@ -186,6 +192,11 @@ function getTransactionDetail(transaction: Transaction): TransactionDetail {
   // console.log(detail);
   return detail;
 }
+
+const enterPlugin = keymap({
+  Enter: removeEmptyListItemAndInsertParagraph,
+  ArrowLeft: handleArrowLeftChecklistCommand,
+});
 
 @Component({
   selector: 'app-editor',
@@ -533,6 +544,7 @@ export class EditorComponent implements OnDestroy {
         //   document.querySelector('#content') as Node
         // ),
         plugins: [
+          enterPlugin,
           ...exampleSetup({ schema: this.mySchema }),
           selectionPlugin(this.view),
           //footerPlugin,
@@ -550,6 +562,12 @@ export class EditorComponent implements OnDestroy {
         // },
         [imageBlockNodeName]: (node, view, getPos, decorations) => {
           return new ImageBlockNodeView(node, view, getPos, decorations);
+        },
+        // [customListNodeName]: (node, view, getPos, decorations) => {
+        //   return new customListNodeView(node, view, getPos);
+        // },
+        [customListItemNodeName]: (node, view, getPos, decorations) => {
+          return new customListItemNodeView(node, view, getPos, decorations);
         },
       },
       dispatchTransaction: (tr: Transaction) => {

@@ -20,6 +20,7 @@
     "@remirror/pm": "^3.0.1",
     "prosemirror-commands": "^1.7.1",
     "prosemirror-example-setup": "^1.2.3",
+    "prosemirror-keymap": "^1.2.3",
     "prosemirror-model": "^1.25.1",
     "prosemirror-resizable-view": "^3.0.0",
     "prosemirror-schema-basic": "^1.2.4",
