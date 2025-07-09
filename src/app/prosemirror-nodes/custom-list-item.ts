@@ -18,6 +18,7 @@ export const className = 'custom-list-item-node';
 export const customListItemNodeName = 'custom_list_item';
 export const customListItemNodeSpec: NodeSpec = {
   content: 'text*',
+  defining: true,
   attrs: {
     checked: { default: false },
     class: { default: className },
@@ -156,7 +157,7 @@ export const removeEmptyListItemAndInsertParagraph: Command = (
     // Place the selection inside the newly inserted paragraph
     // The selection should be at the start of the new paragraph.
     // The position is mappedPos + 1 (inside the paragraph).
-    const newSelectionPos = tr.doc.resolve(mappedPos + 1);
+    const newSelectionPos = tr.doc.resolve(mappedPos + 2);
     // //tr = tr.setSelection(new TextSelection(newSelectionPos)); // Simplified way to set selection inside the new paragraph
     tr = tr.setSelection(TextSelection.create(tr.doc, newSelectionPos.pos));
 
