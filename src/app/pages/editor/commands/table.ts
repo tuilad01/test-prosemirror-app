@@ -2,6 +2,7 @@ import { EditorState, Transaction } from 'prosemirror-state';
 import { SchemaNode } from '../nodes/const';
 import { CellSelection, TableMap, selectedRect } from 'prosemirror-tables';
 import { findParentNodeOfType } from 'prosemirror-utils';
+import { EditorView } from 'prosemirror-view';
 
 export const insertTable =
   (rows: number, cols: number) =>
@@ -56,6 +57,7 @@ export const insertTable =
 // Custom command to distribute column widths for selected columns
 export const distributeSelectedColumnsWidth = (
   state: EditorState,
+  view: EditorView,
   dispatch?: (tr: Transaction) => void
 ) => {
   const { selection, schema } = state;
@@ -100,16 +102,33 @@ export const distributeSelectedColumnsWidth = (
   // For this example, we'll set a fixed width of 100 pixels.
   // You could calculate this dynamically based on total table width,
   // average of existing widths, or user input.
-  const targetColWidth = 100; // pixels
+  //const targetColWidth = 100; // pixels
+
+  const cells = map.cellsInRect(rect);
+
+  let totalWidth = 0;
+  for (const selectedColumnIndex of selectedColumnIndices) {
+    const cellAbsPos = tableStart + map.map[selectedColumnIndex];
+    const cell = state.doc.nodeAt(cellAbsPos);
+    if (cell && (cell.type === cellType || cell.type === headerType)) {
+      const { colwidth } = cell.attrs;
+      let width = colwidth ? colwidth[0] : 0;
+      if (width === 0) {
+        const cellDom = view.domAtPos(cellAbsPos + 1).node as HTMLElement;
+        width = cellDom.getBoundingClientRect().width;
+      }
+      totalWidth += +width;
+    }
+  }
+
+  const averageColumnWidth = totalWidth / selectedColumnIndices.length;
 
   let tr = state.tr;
   let changed = false;
 
   // Iterate through each cell in the table
-  console.log('map.map', map.map);
-  map.cellsInRect(rect).forEach((_cellPos) => {
+  cells.forEach((_cellPos, index) => {
     // Check if this cell's column index is among the selected columns
-    //if (selectedColumnIndices.includes(colIdx)) {
     const cellAbsPos = tableStart + _cellPos;
     const cell = state.doc.nodeAt(cellAbsPos);
 
@@ -117,15 +136,14 @@ export const distributeSelectedColumnsWidth = (
     if (cell && (cell.type === cellType || cell.type === headerType)) {
       // Check if the cell's current colwidth is different from the target
       const { colwidth } = cell.attrs;
-      if (colwidth !== targetColWidth) {
-        const updatedAttrs = { ...cell.attrs, colwidth: [targetColWidth] };
+      if (colwidth !== averageColumnWidth) {
+        const updatedAttrs = { ...cell.attrs, colwidth: [averageColumnWidth] };
         const updatedCell = cell.type.create(updatedAttrs, cell.content);
         // Replace the old cell with the new one in the transaction
         tr.replaceWith(cellAbsPos, cellAbsPos + cell.nodeSize, updatedCell);
         changed = true;
       }
     }
-    //}
   });
 
   // Dispatch the transaction if any changes were made

@@ -39,6 +39,8 @@ import {
   tableEditing,
 } from 'prosemirror-tables';
 import { distributeSelectedColumnsWidth, insertTable } from './commands/table';
+import { lift, toggleMark } from 'prosemirror-commands';
+import { liftListItem } from 'prosemirror-schema-list';
 
 @Component({
   selector: 'app-editor',
@@ -48,13 +50,27 @@ import { distributeSelectedColumnsWidth, insertTable } from './commands/table';
   encapsulation: ViewEncapsulation.None,
 })
 export class EditorComponent implements OnDestroy {
+  handleRemoveList() {
+    const { state, dispatch } = this.view!;
+    const { tr, selection, schema } = state;
+    const { paragraph, list_item } = schema.nodes;
+
+    liftListItem(list_item)(state, dispatch);
+  }
+
+  handleToggleFontSize(fontSize: number = 40) {
+    toggleMark(this.view!.state.schema.marks['fontSize'], {
+      fontSize: '40px',
+    })(this.view!.state, this.view!.dispatch);
+  }
   handleDistributeCells() {
     if (!this.view) {
       return;
     }
     const { state, dispatch } = this.view;
     const { tr, selection, schema } = state;
-    distributeSelectedColumnsWidth(state, dispatch);
+
+    distributeSelectedColumnsWidth(state, this.view, dispatch);
   }
   handleInsertTable() {
     if (!this.view) {
@@ -178,7 +194,7 @@ export class EditorComponent implements OnDestroy {
     }
   }
 
-  toggleMarkCommand(markTypeName: string) {
+  toggleMarkCommand(markTypeName: string, attrs?: any) {
     if (!this.view) {
       return;
     }
