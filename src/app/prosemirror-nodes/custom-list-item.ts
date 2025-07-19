@@ -17,7 +17,8 @@ import {
 export const className = 'custom-list-item-node';
 export const customListItemNodeName = 'custom_list_item';
 export const customListItemNodeSpec: NodeSpec = {
-  content: 'text*',
+  group: 'block',
+  content: 'inline*',
   defining: true,
   attrs: {
     checked: { default: false },
@@ -25,16 +26,28 @@ export const customListItemNodeSpec: NodeSpec = {
   },
   parseDOM: [
     {
-      tag: `div.${className}`,
+      tag: `div.${className}`, // Matches the outer div with the class
+      // Corrected: The content div is a direct child 'div' of the matched tag
+      // contentElement: 'div',
+      getAttrs(dom) {
+        // Find the checkbox input within the parsed DOM element
+        const checkbox = dom.querySelector(
+          'input[type="checkbox"]'
+        ) as HTMLInputElement;
+
+        return {
+          checked: checkbox ? checkbox.checked : false, // Get the checked state directly from the input
+          class: dom.className, // Re-read the class from the DOM if necessary
+        };
+      },
     },
   ],
   toDOM(node) {
     let { class: className, column } = node.attrs;
     return [
       'div',
-      { class: className },
-      ['input', { type: 'checkbox' }],
-      ['div', 0],
+      { class: className, contenteditable: 'true' },
+      ['input', { type: 'checkbox' }, 0],
     ];
   },
 };
@@ -43,6 +56,7 @@ export class customListItemNodeView implements NodeView {
   dom: HTMLElement;
   contentDOM: HTMLElement;
   input: HTMLInputElement;
+  //beforeInputDom: HTMLDivElement;
 
   constructor(
     public node: Node,
@@ -52,14 +66,34 @@ export class customListItemNodeView implements NodeView {
   ) {
     const className = node.attrs['class'];
     this.dom = document.createElement('div');
+    this.dom.contentEditable = 'true';
     this.dom.classList.add(className);
 
     this.input = this.dom.appendChild(document.createElement('input'));
     this.input.type = 'checkbox';
     this.input.contentEditable = 'false';
     this.input.addEventListener('change', this.handleChange.bind(this));
+    // this.beforeInputDom = this.dom.appendChild(document.createElement('div'));
+    // this.beforeInputDom.textContent = '123';
+    // this.beforeInputDom.contentEditable = 'true';
 
     this.contentDOM = this.dom.appendChild(document.createElement('div'));
+    // this.contentDOM.contentEditable = 'true';
+    //this.contentDOM = this.dom;
+  }
+
+  stopEvent(event: Event): boolean {
+    // If the event target is the checkbox, stop ProseMirror from handling it.
+    console.log(event.target);
+    if (event.target === this.dom) {
+      return true; // ProseMirror should ignore this event
+    }
+    // If the event target is the static 'beforeInputDom' or its children.
+    // if (this.beforeInputDom.contains(event.target as HTMLElement)) {
+    //   return true; // ProseMirror should ignore this event
+    // }
+    // For other events (e.g., within contentDOM), let ProseMirror handle them.
+    return false;
   }
 
   update(
@@ -80,7 +114,14 @@ export class customListItemNodeView implements NodeView {
 
   destroy() {
     this.input.removeEventListener('change', this.handleChange.bind(this));
-    this.dom.remove();
+    if (
+      this.dom.parentElement?.children.length === 1 &&
+      this.contentDOM.textContent === ''
+    ) {
+      this.dom.parentElement.remove();
+    } else {
+      this.dom.remove();
+    }
   }
 
   handleChange(event: Event) {

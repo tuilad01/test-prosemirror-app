@@ -35,7 +35,19 @@ export const customListNodeSpec: NodeSpec = {
           .fill(0)
           .reduce((prev) => prev + ' 1fr', '') +
         ';');
-    return ['div', { class: className, column, style }, 0];
+    return [
+      'div',
+      {
+        class: className,
+        column,
+        ...(style ? { style: style } : {}),
+        contenteditable: 'true',
+      },
+      // ['div', '123'],
+      // ['input', { type: 'checkbox' }],
+      // ['div', 0],
+      0,
+    ];
   },
 };
 

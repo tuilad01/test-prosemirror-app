@@ -1,8 +1,5 @@
 import {
   afterNextRender,
-  afterRender,
-  AfterViewInit,
-  ChangeDetectionStrategy,
   Component,
   effect,
   ElementRef,
@@ -14,43 +11,15 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import {
-  EditorState,
-  Selection,
-  TextSelection,
-  Transaction,
-} from 'prosemirror-state';
+import { EditorState, Selection, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
-import { Schema, DOMParser, NodeSpec, Mark } from 'prosemirror-model';
-import { marks, schema } from 'prosemirror-schema-basic';
-import { addListNodes } from 'prosemirror-schema-list';
+import { Mark } from 'prosemirror-model';
 import { exampleSetup } from 'prosemirror-example-setup';
-import { pageBreakPlugin } from '@app/prosemirror-plugin/page-break-plugin';
-import { createPage, pageSchema } from '@app/prosemirror-schema/page-schema';
+import { pageSchema } from '@app/prosemirror-schema/page-schema';
 import { Node } from 'prosemirror-model';
-import {
-  pageBreakPlugin2,
-  repaginate,
-  repaginate2,
-} from '@app/prosemirror-plugin/page-break-plugin2';
-import {
-  canJoin,
-  MapResult,
-  ReplaceStep,
-  StepMap,
-} from 'prosemirror-transform';
-import { createParagraph } from '@app/prosemirror-nodes/paragraph';
-import { toggleMark } from 'prosemirror-commands';
-import { fontSizeMark } from '@app/prosemirror-marks/font-size-mark';
 import { selectionPlugin } from '@app/prosemirror-plugin/selection-plugin';
 import { Router } from '@angular/router';
-import { FooterNodeView } from '@app/prosemirror-nodes/footer-nodeview';
-import { ResizableImageView } from '@app/prosemirror-nodes/custom-image';
-import {
-  editableHeaderNodeName,
-  EditableHeaderNodeView,
-} from '@app/prosemirror-nodes/editable-header-nodeview';
-import { footerPlugin } from '@app/prosemirror-plugin/footer-plugin';
+import { editableHeaderNodeName } from '@app/prosemirror-nodes/editable-header-nodeview';
 import { headerNodeName } from '@app/prosemirror-nodes/page-header';
 import { decorationPlugin } from '@app/prosemirror-plugin/decoration-plugin';
 import {
@@ -61,142 +30,15 @@ import { customListNodeName } from '@app/prosemirror-nodes/custom-list';
 import {
   customListItemNodeName,
   customListItemNodeView,
-  handleArrowLeftChecklistCommand,
-  removeEmptyListItemAndInsertParagraph,
 } from '@app/prosemirror-nodes/custom-list-item';
 import { keymap } from 'prosemirror-keymap';
-
-class TransactionType {
-  type: 'UNKNOWN' | 'INSERT' | 'DELETE' | 'CLICK' | 'SELECT' = 'UNKNOWN';
-  insertText?: string; // This only has if type = INSERT
-}
-
-function isClickTransaction(transaction: Transaction) {
-  return (
-    transaction.steps &&
-    transaction.steps.length === 0 &&
-    transaction.selection.from === transaction.selection.to
-  );
-}
-function isSelectTransaction(transaction: Transaction) {
-  return (
-    transaction.steps &&
-    transaction.steps.length === 0 &&
-    transaction.selection.from !== transaction.selection.to
-  );
-}
-
-function isInsertTransaction(transaction: Transaction) {
-  return (
-    transaction.steps &&
-    transaction.step.length > 0 &&
-    transaction.steps[0] instanceof ReplaceStep &&
-    transaction.steps[0].from === transaction.steps[0].to
-  );
-}
-function isDeleteTransaction(transaction: Transaction) {
-  return (
-    transaction.steps &&
-    transaction.step.length > 0 &&
-    transaction.steps[0] instanceof ReplaceStep &&
-    transaction.steps[0].from < transaction.steps[0].to
-  );
-}
-
-function getInsertText(transaction: Transaction) {
-  const step = transaction.steps[0] as ReplaceStep | undefined;
-  return step?.slice.content.textBetween(0, step.slice.content.size) || '';
-}
-
-/**
- * - INSERT type could be PASTE
- * - DELETE type could be CUT
- * @param transaction
- * @returns
- */
-function getTransactionType(transaction: Transaction): TransactionType {
-  if (!transaction.steps) {
-    return { type: 'UNKNOWN' };
-  }
-
-  if (isClickTransaction(transaction)) {
-    return { type: 'CLICK' };
-  }
-
-  if (isSelectTransaction(transaction)) {
-    return { type: 'SELECT' };
-  }
-
-  if (isInsertTransaction(transaction)) {
-    return { type: 'INSERT', insertText: getInsertText(transaction) };
-  }
-
-  if (isDeleteTransaction(transaction)) {
-    return { type: 'DELETE' };
-  }
-
-  return { type: 'UNKNOWN' };
-}
-
-interface TransactionDetail {
-  page?: Node;
-  pageStartOutsidePosition: number;
-  pageEndOutsidePosition: number;
-  pageStartInsidePosition: number;
-  pageEndInsidePosition: number;
-  nextPage?: Node;
-  block?: Node;
-  blockStartOutsidePosition: number;
-  blockEndOutsidePosition: number;
-  blockStartInsidePoistion: number;
-  blockEndInsidePosition: number;
-}
-
-function getTransactionDetail(transaction: Transaction): TransactionDetail {
-  const { selection } = transaction,
-    { depth } = selection.$from;
-  const pageDepth = 1;
-
-  const page = selection.$from.node(pageDepth);
-  const pageStartOutside = selection.$from.start(pageDepth); // first position at outside dom element
-  const pageEndOutside = selection.$from.end(pageDepth); // last position at oside dom element
-  const pageStartInside = selection.$from.before(pageDepth); // first position at inside dom element
-  const pageEndInside = selection.$from.after(pageDepth); // last posistion at inside dom element
-
-  const block = selection.$from.node(depth);
-  const blockStartOutside = selection.$from.start(depth); // first position at outside dom element
-  const blockEndOutside = selection.$from.end(depth); // last position at oside dom element
-  const blockStartInside = selection.$from.before(depth); // first position at inside dom element
-  const blockEndInside = selection.$from.after(depth); // last posistion at inside dom element
-
-  const pageIndex = selection.$from.index(pageDepth);
-  const nextPage =
-    transaction.doc.children.length > pageIndex + 1
-      ? transaction.doc.child(pageIndex + 1)
-      : undefined;
-
-  const detail: TransactionDetail = {
-    page: page,
-    pageStartOutsidePosition: pageStartOutside,
-    pageEndOutsidePosition: pageEndOutside,
-    pageStartInsidePosition: pageStartInside,
-    pageEndInsidePosition: pageEndInside,
-    nextPage: nextPage,
-    block: block,
-    blockStartOutsidePosition: blockStartOutside,
-    blockEndOutsidePosition: blockEndOutside,
-    blockStartInsidePoistion: blockStartInside,
-    blockEndInsidePosition: blockEndInside,
-  };
-
-  // console.log(detail);
-  return detail;
-}
-
-const enterPlugin = keymap({
-  Enter: removeEmptyListItemAndInsertParagraph,
-  ArrowLeft: handleArrowLeftChecklistCommand,
-});
+import {
+  columnResizing,
+  fixTables,
+  goToNextCell,
+  tableEditing,
+} from 'prosemirror-tables';
+import { distributeSelectedColumnsWidth, insertTable } from './commands/table';
 
 @Component({
   selector: 'app-editor',
@@ -206,6 +48,22 @@ const enterPlugin = keymap({
   encapsulation: ViewEncapsulation.None,
 })
 export class EditorComponent implements OnDestroy {
+  handleDistributeCells() {
+    if (!this.view) {
+      return;
+    }
+    const { state, dispatch } = this.view;
+    const { tr, selection, schema } = state;
+    distributeSelectedColumnsWidth(state, dispatch);
+  }
+  handleInsertTable() {
+    if (!this.view) {
+      return;
+    }
+    const { state, dispatch } = this.view;
+    const { tr, selection, schema } = state;
+    insertTable(2, 3)(state, dispatch);
+  }
   handleInsertHeader() {
     if (!this.view) {
       return;
@@ -385,13 +243,6 @@ export class EditorComponent implements OnDestroy {
     afterNextRender(() => {
       //console.log('afterNextRender', this.editorDom()?.nativeElement.innerHTML);
     });
-
-    // afterRender(() => {
-    //   console.log('afterRender', this.editorDom()?.nativeElement.innerHTML);
-    //   // if (!this.editorDom()?.nativeElement) {
-    //   //   this.initEditor();
-    //   // }
-    // });
   }
   ngOnDestroy(): void {
     this.view?.destroy();
@@ -402,11 +253,6 @@ export class EditorComponent implements OnDestroy {
     this.initEditor();
   }
   initEditor() {
-    // const page = this.mySchema.nodes['doc'].create(null, [
-    //   createPage(['dat', 'truong', 'tan'].map(createParagraph), 1),
-    //   createPage(['dat2', 'truong2', 'tan2'].map(createParagraph), 2),
-    // ]);
-
     const doc = Node.fromJSON(this.mySchema, {
       type: 'doc',
       content: [
@@ -442,24 +288,6 @@ export class EditorComponent implements OnDestroy {
             },
           ],
         },
-        // {
-        //   type: editableHeaderNodeName,
-        //   attrs: {
-        //     content: 'Header non-editable [variable1]',
-        //     data: 'variable1',
-        //   },
-        //   content: [
-        //     {
-        //       type: 'paragraph',
-        //       content: [
-        //         {
-        //           type: 'text',
-        //           text: 'Dat Truong Tan',
-        //         },
-        //       ],
-        //     },
-        //   ],
-        // },
         {
           type: 'paragraph',
           content: [
@@ -471,36 +299,6 @@ export class EditorComponent implements OnDestroy {
         },
       ],
     });
-    // const doc = Node.fromJSON(this.mySchema, {
-    //   type: 'doc',
-    //   content: [
-    //     {
-    //       type: 'page',
-    //       attrs: { 'page-number': '1' },
-    //       content: [
-    //         {
-    //           type: 'paragraph',
-    //           content: [
-    //             {
-    //               type: 'text',
-    //               text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. blandit lorem in auctor egestas. In vehicula, lorem ac tempus lacinia, velit mauris dignissim odio, venenatis faucibus eros lorem accumsan mauris. Maecenas risus nisl, aliquet id mi eu, iaculis mattis ante. Aliquam nec tincidunt felis, vitae venenatis ligula. Integer eleifend, justo ac mattis sagittis, tortor lorem ornare nibh, at tempor enim nisi vitae diam. Praesent venenatis commodo orci a tristique. Nulla ex nibh, laoreet ut quam quis, rhoncus faucibus magna.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam blandit arcu ut odio iaculis, eu facilisis massa varius. Praesent dolor nibh, laoreet ac nisi id, placerat gravida justo. Quisque ac felis dictum nulla ornare posuere. Interdum et malesuada fames ac ante ipsum primis in faucibus. Quisque pretium lacinia justo quis hendrerit. Phasellus tortor risus, dapibus sed nunc ut, lacinia lobortis turpis. Praesent porttitor leo at libero dapibus auctor. Sed ac molestie tellus. Etiam ultrices magna quis pulvinar blandit. Phasellus bibendum consequat tincidunt. Quisque sed sem sed lacus volutpat placerat. Sed nisi lacus, aliquet ac lobortis ut, iaculis quis ipsum. Nam sagittis tortor sit amet scelerisque vulputate. Aenean mollis et enim at ultricies. Etiam ac sollicitudin elit, eget sollicitudin ligula. Integer id urna vehicula, cursus mauris sit amet, tristique lacus. Nunc faucibus ex nec enim dapibus vehicula. Nunc at leo laoreet, pharetra lacus ut, ultricies urna. Cras vitae finibus tellus. Praesent quis nunc id purus gravida tempor. Fusce ac felis venenatis, luctus arcu elementum, tempor neque. Nullam ut erat id purus tincidunt dictum. Curabitur imperdiet vel augue nec ornare. In hac habitasse platea dictumst. Proin pulvinar augue sapien, eget porttitor tellus pharetra ac. Nam sit amet nunc et lectus sodales dictum non ut leo. Maecenas vestibulum justo nec lacinia rutrum. Maecenas in fermentum lectus, sed aliquam ipsum. Aliquam interdum sollicitudin mi, vel placerat magna commodo et. Nunc sit amet est mauris. Nam accumsan ullamcorper tortor et mollis. Nunc accumsan est nec varius pulvinar. Vivamus feugiat volutpat tortor non volutpat. Mauris et felis in justo porttitor maximus faucibus sed enim. Etiam imperdiet sed turpis et vulputate. Morbi posuere ex nec dui vulputate, sed consequat felis venenatis. Duis consectetur sodales arcu. Pellentesque laoreet malesuada nunc nec rutrum. Suspendisse tincidunt sed nunc vitae varius. Ut pellentesque ipsum ac pulvinar porttitor. Duis et elit a odio auctor venenatis. Curabitur sit amet leo et magna fermentum accumsan. Pellentesque interdum hendrerit ex et vulputate. Suspendisse condimentum aliquet mi at placerat. Aliquam dapibus magna ut urna euismod, congue condimentum nibh scelerisque. Nam iaculis lobortis nisi, nec facilisis lorem rhoncus nec. Aenean blandit lorem in auctor egestas. In vehicula, lorem ac tempus lacinia, velit mauris dignissim odio, venenatis faucibus eros lorem accumsan mauris. Maecenas risus nisl, aliquet id mi eu, iaculis mattis ante. Aliquam nec tincidun',
-    //             },
-    //           ],
-    //         },
-    //       ],
-    //     },
-    //     // {
-    //     //   type: 'page',
-    //     //   attrs: { 'page-number': '2' },
-    //     //   content: [
-    //     //     {
-    //     //       type: 'paragraph',
-    //     //       content: [{ type: 'text', text: 'page 2' }],
-    //     //     },
-    //     //   ],
-    //     // },
-    //   ],
-    // });
 
     const findNextBlock = (transaction: Transaction) => {
       const nodeAfter = Selection.findFrom(
@@ -536,36 +334,35 @@ export class EditorComponent implements OnDestroy {
     }
     const editorElements = document.querySelectorAll('#editor');
     //this.view = new EditorView(editorDom!.nativeElement as HTMLElement, {
+    let state = EditorState.create({
+      schema: this.mySchema,
+      doc: doc,
+      plugins: [
+        //enterPlugin,
+        columnResizing(),
+        tableEditing(),
+        keymap({
+          Tab: goToNextCell(1),
+          'Shift-Tab': goToNextCell(-1),
+        }),
+        ...exampleSetup({ schema: this.mySchema }),
+        selectionPlugin(this.view),
+        //footerPlugin,
+        decorationPlugin,
+        //pageBreakPlugin2(this.view),
+      ],
+    });
+
+    const fix = fixTables(state);
+    if (fix) {
+      state = state.apply(fix.setMeta('addToHistory', false));
+    }
     this.view = new EditorView(editorElements[editorElements.length - 1], {
-      state: EditorState.create({
-        schema: this.mySchema,
-        doc: doc,
-        // doc: DOMParser.fromSchema(this.mySchema).parse(
-        //   document.querySelector('#content') as Node
-        // ),
-        plugins: [
-          enterPlugin,
-          ...exampleSetup({ schema: this.mySchema }),
-          selectionPlugin(this.view),
-          //footerPlugin,
-          decorationPlugin,
-          //pageBreakPlugin2(this.view),
-        ],
-      }),
+      state: state,
       nodeViews: {
-        // pageFooter: (node, view, getPos, decorations) =>
-        //   new FooterNodeView(node, view, getPos, decorations),
-        // image: (node, view, getPos, decorations) =>
-        //   new ResizableImageView(node, view, getPos, decorations),
-        // [editableHeaderNodeName]: (node, view, getPos, decorations) => {
-        //   return new EditableHeaderNodeView(node, view, getPos, decorations);
-        // },
         [imageBlockNodeName]: (node, view, getPos, decorations) => {
           return new ImageBlockNodeView(node, view, getPos, decorations);
         },
-        // [customListNodeName]: (node, view, getPos, decorations) => {
-        //   return new customListNodeView(node, view, getPos);
-        // },
         [customListItemNodeName]: (node, view, getPos, decorations) => {
           return new customListItemNodeView(node, view, getPos, decorations);
         },
@@ -769,85 +566,6 @@ export class EditorComponent implements OnDestroy {
         view.updateState(state.apply(tr));
       },
     });
-
-    // this.view.setProps({
-    //   handleTextInput(view, from, to, text) {
-    //     //console.log('handleTextInput');
-    //   },
-    //   handleKeyDown: (view, event) => {
-    //     let tr = view.state.tr;
-    //     const { $to, to } = view.state.selection;
-    //     //console.log('to', to);
-    //     const blockToTop = this.getBlockDistanceFromPage(view);
-    //     // if (event.key === 'Enter' && blockToTop && blockToTop + 18 > 75) {
-    //     //   const nextPageIndex = $to.indexAfter(1) - 1;
-    //     //   let nextPage =
-    //     //     nextPageIndex + 1 > view.state.doc.childCount
-    //     //       ? undefined
-    //     //       : view.state.doc.child(nextPageIndex);
-
-    //     //   if (!nextPage) {
-    //     //     tr.insert(
-    //     //       view.state.doc.content.size,
-    //     //       createPage(
-    //     //         [view.state.schema.nodes['paragraph'].create(null)],
-    //     //         nextPageIndex + 1
-    //     //       )
-    //     //     );
-    //     //     //const toMap = tr.mapping.map(to);
-    //     //     //const newPosition = tr.doc.resolve(toMap);
-    //     //     nextPage = tr.doc.child(nextPageIndex);
-    //     //   }
-    //     //   //const nextPage = view.state.doc.resolve(pageEnd + 1).after;
-    //     //   console.log('nextPage', nextPage);
-    //     //   //const contentPage = nextPage.child(1);
-    //     //   //const firstBlockContentPage = contentPage.firstChild;
-    //     //   // nextPage.forEach((node, offset) => {
-    //     //   //   console.log('node', node, 'offset', offset);
-    //     //   //   if (node.type.name === 'pageContent') {
-    //     //   //     return;
-    //     //   //   }
-    //     //   // });
-    //     //   let validCursor;
-    //     //   let contentPagePos;
-    //     //   tr.doc.descendants((node, pos) => {
-    //     //     //console.log('node', node, 'pos', pos);
-    //     //     if (node.type.name === 'pageContent') {
-    //     //       contentPagePos = pos;
-    //     //       validCursor = Selection.findFrom(tr.doc.resolve(pos), 1);
-    //     //     }
-    //     //     return node.attrs['page-number'] == nextPage.attrs['page-number'];
-    //     //   });
-
-    //     //   //console.log('validCursor', validCursor);
-    //     //   if (validCursor) {
-    //     //     view.dispatch(tr.setSelection(validCursor).scrollIntoView());
-    //     //   }
-
-    //     //   if (contentPagePos) {
-    //     //     // tr.insert(
-    //     //     //   contentPagePos + 1,
-    //     //     //   view.state.schema.nodes['paragraph'].create()
-    //     //     // );
-    //     //     // const newSelection = TextSelection.findFrom(
-    //     //     //   tr.doc.resolve(tr.mapping.map(contentPagePos)),
-    //     //     //   1
-    //     //     // );
-    //     //     // tr.setSelection(newSelection!).scrollIntoView();
-    //     //     // view.dispatch(tr);
-    //     //   }
-    //     // }
-    //     // console.log('blockToTop', blockToTop);
-    //   },
-    // });
-    // document.addEventListener('click', (event) => {
-    //   console.log(event.target);
-
-    //   console.log(
-    //     'posAtDOM: ',
-    //     this.view?.posAtDOM(event.target as any, 0, -1)
-    //   );
-    // });
   }
 
   findAllMarks(from: number, to: number, doc: Node) {
@@ -873,11 +591,6 @@ export class EditorComponent implements OnDestroy {
     }
     const { state, dispatch } = this.view;
     const { page: pageNode } = this.mySchema.nodes;
-
-    // const { $from } = state.selection;
-    // const index = $from.index();
-
-    // if (!$from.parent.canReplaceith(index, index, pageNode)) return false;
 
     if (dispatch) {
       this.pageNumber += 1;
