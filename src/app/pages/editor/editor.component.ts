@@ -41,6 +41,10 @@ import {
 import { distributeSelectedColumnsWidth, insertTable } from './commands/table';
 import { lift, toggleMark } from 'prosemirror-commands';
 import { liftListItem } from 'prosemirror-schema-list';
+import {
+  splitTable,
+  splitTablePlugin,
+} from '@app/prosemirror-plugin/split-table-plugin';
 
 @Component({
   selector: 'app-editor',
@@ -50,6 +54,12 @@ import { liftListItem } from 'prosemirror-schema-list';
   encapsulation: ViewEncapsulation.None,
 })
 export class EditorComponent implements OnDestroy {
+  handleSplitTable() {
+    const tr = splitTable(this.view?.state!, 2);
+    if (tr) {
+      this.view?.dispatch(tr);
+    }
+  }
   handleRemoveList() {
     const { state, dispatch } = this.view!;
     const { tr, selection, schema } = state;
@@ -78,7 +88,7 @@ export class EditorComponent implements OnDestroy {
     }
     const { state, dispatch } = this.view;
     const { tr, selection, schema } = state;
-    insertTable(2, 3)(state, dispatch);
+    insertTable(4, 3)(state, dispatch);
   }
   handleInsertHeader() {
     if (!this.view) {
@@ -366,6 +376,7 @@ export class EditorComponent implements OnDestroy {
         //footerPlugin,
         decorationPlugin,
         //pageBreakPlugin2(this.view),
+        //splitTablePlugin,
       ],
     });
 
