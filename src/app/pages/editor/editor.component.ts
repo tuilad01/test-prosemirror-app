@@ -33,12 +33,19 @@ import {
 } from '@app/prosemirror-nodes/custom-list-item';
 import { keymap } from 'prosemirror-keymap';
 import {
+  cellAround,
   columnResizing,
   fixTables,
   goToNextCell,
+  selectedRect,
   tableEditing,
+  TableMap,
 } from 'prosemirror-tables';
-import { distributeSelectedColumnsWidth, insertTable } from './commands/table';
+import {
+  distributeSelectedColumnsWidth,
+  insertTable,
+  TableBorder,
+} from './commands/table';
 import { lift, toggleMark } from 'prosemirror-commands';
 import { liftListItem } from 'prosemirror-schema-list';
 import {
@@ -54,6 +61,46 @@ import {
   encapsulation: ViewEncapsulation.None,
 })
 export class EditorComponent implements OnDestroy {
+  handleSetBorderNone() {
+    if (!this.view) return;
+
+    const { state, dispatch } = this.view;
+    const { tr } = state;
+    const cellAroundResult = cellAround(state.selection.$from);
+    if (!cellAroundResult) {
+      console.warn('WARN. No cell around.');
+      return;
+    }
+
+    const tableRect = selectedRect(state);
+    if (!tableRect) {
+      console.warn('WARN. Not selection in table.');
+      return;
+    }
+
+    const tableMap = TableMap.get(tableRect.table);
+
+    const cellsInRect = tableMap.cellsInRect(tableRect);
+    let hasChanged = false;
+    for (const cellPos of cellsInRect) {
+      const cellAbsPos = cellPos + tableRect.tableStart;
+      const cell = state.doc.nodeAt(cellAbsPos);
+      if (
+        cell &&
+        (cell.type.name === 'table_cell' || cell?.type.name === 'table_header')
+      ) {
+        hasChanged = true;
+        tr.setNodeMarkup(cellAbsPos, undefined, {
+          ...cell.attrs,
+          border: TableBorder.left + TableBorder.right,
+        });
+      }
+    }
+
+    if (hasChanged) {
+      dispatch(tr.scrollIntoView());
+    }
+  }
   handleSplitTable() {
     const tr = splitTable(this.view?.state!, 2);
     if (tr) {
@@ -292,6 +339,199 @@ export class EditorComponent implements OnDestroy {
           ],
         },
         {
+          type: 'table',
+          content: [
+            {
+              type: 'table_row',
+              content: [
+                {
+                  type: 'table_cell',
+                  attrs: {
+                    colspan: 1,
+                    rowspan: 1,
+                    colwidth: null,
+                    background: null,
+                  },
+                  content: [
+                    {
+                      type: 'paragraph',
+                    },
+                  ],
+                },
+                {
+                  type: 'table_cell',
+                  attrs: {
+                    colspan: 1,
+                    rowspan: 1,
+                    colwidth: null,
+                    background: null,
+                  },
+                  content: [
+                    {
+                      type: 'paragraph',
+                    },
+                  ],
+                },
+                {
+                  type: 'table_cell',
+                  attrs: {
+                    colspan: 1,
+                    rowspan: 1,
+                    colwidth: null,
+                    background: null,
+                  },
+                  content: [
+                    {
+                      type: 'paragraph',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'table_row',
+              content: [
+                {
+                  type: 'table_cell',
+                  attrs: {
+                    colspan: 1,
+                    rowspan: 1,
+                    colwidth: null,
+                    background: null,
+                  },
+                  content: [
+                    {
+                      type: 'paragraph',
+                    },
+                  ],
+                },
+                {
+                  type: 'table_cell',
+                  attrs: {
+                    colspan: 1,
+                    rowspan: 1,
+                    colwidth: null,
+                    background: null,
+                  },
+                  content: [
+                    {
+                      type: 'paragraph',
+                    },
+                  ],
+                },
+                {
+                  type: 'table_cell',
+                  attrs: {
+                    colspan: 1,
+                    rowspan: 1,
+                    colwidth: null,
+                    background: null,
+                  },
+                  content: [
+                    {
+                      type: 'paragraph',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'table_row',
+              content: [
+                {
+                  type: 'table_cell',
+                  attrs: {
+                    colspan: 1,
+                    rowspan: 1,
+                    colwidth: null,
+                    background: null,
+                  },
+                  content: [
+                    {
+                      type: 'paragraph',
+                    },
+                  ],
+                },
+                {
+                  type: 'table_cell',
+                  attrs: {
+                    colspan: 1,
+                    rowspan: 1,
+                    colwidth: null,
+                    background: null,
+                  },
+                  content: [
+                    {
+                      type: 'paragraph',
+                    },
+                  ],
+                },
+                {
+                  type: 'table_cell',
+                  attrs: {
+                    colspan: 1,
+                    rowspan: 1,
+                    colwidth: null,
+                    background: null,
+                  },
+                  content: [
+                    {
+                      type: 'paragraph',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'table_row',
+              content: [
+                {
+                  type: 'table_cell',
+                  attrs: {
+                    colspan: 1,
+                    rowspan: 1,
+                    colwidth: null,
+                    background: null,
+                  },
+                  content: [
+                    {
+                      type: 'paragraph',
+                    },
+                  ],
+                },
+                {
+                  type: 'table_cell',
+                  attrs: {
+                    colspan: 1,
+                    rowspan: 1,
+                    colwidth: null,
+                    background: null,
+                  },
+                  content: [
+                    {
+                      type: 'paragraph',
+                    },
+                  ],
+                },
+                {
+                  type: 'table_cell',
+                  attrs: {
+                    colspan: 1,
+                    rowspan: 1,
+                    colwidth: null,
+                    background: null,
+                  },
+                  content: [
+                    {
+                      type: 'paragraph',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
           type: imageBlockNodeName,
         },
         {
@@ -371,12 +611,12 @@ export class EditorComponent implements OnDestroy {
           Tab: goToNextCell(1),
           'Shift-Tab': goToNextCell(-1),
         }),
+        splitTablePlugin,
         ...exampleSetup({ schema: this.mySchema }),
         selectionPlugin(this.view),
         //footerPlugin,
         decorationPlugin,
         //pageBreakPlugin2(this.view),
-        //splitTablePlugin,
       ],
     });
 

@@ -1,5 +1,5 @@
 import { headerNodeName } from '@app/prosemirror-nodes/page-header';
-import { Fragment } from 'prosemirror-model';
+import { Fragment, Node } from 'prosemirror-model';
 import {
   PluginKey,
   Plugin,
@@ -7,27 +7,177 @@ import {
   Transaction,
   TextSelection,
 } from 'prosemirror-state';
-import { selectedRect, TableMap } from 'prosemirror-tables';
-import { Decoration, DecorationSet } from 'prosemirror-view';
+import { cellAround, selectedRect, TableMap } from 'prosemirror-tables';
+import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
 import { measureBlockHeights2 } from './page-break-plugin2';
 
+export const splitTablePluginKey = new PluginKey('split_table_plugin');
+
 export const splitTablePlugin = new Plugin({
-  appendTransaction(transactions, oldState, newState) {
-    const transaction = transactions[0];
-    const { schema } = newState;
-    const { $from, $to, $cursor } = newState.selection as TextSelection;
+  key: splitTablePluginKey,
+  view(_) {
+    return {
+      update(view, prevState) {
+        const transaction = splitTableByHeight(view);
+        if (transaction) {
+          view.dispatch(transaction);
+        }
+      },
+    };
+  },
+  // appendTransaction(transactions, oldState, newState) {
+  //   const transaction = transactions[0];
+  //   const { schema } = newState;
+  //   const { $from, $to, $cursor } = newState.selection as TextSelection;
 
-    const block = $from.node(1);
+  //   const block = $from.node(1);
 
-    if (block.type.name === 'table') {
-      const [{ height }] = measureBlockHeights2([block], schema);
-      if (height > 200) {
-        return splitTable(newState, 1);
+  //   if (block.type.name === 'table') {
+  //     const [{ height }] = measureBlockHeights2([block], schema);
+  //     if (height > 200) {
+  //       return splitTableByHeight(newState);
+  //     }
+  //   }
+  //   return null;
+  // },
+});
+
+export function splitTableByHeight(view: EditorView, maxHeight: number = 200) {
+  const { state } = view;
+  const { selection } = state;
+  const { $from } = selection;
+
+  // Find the parent table node
+  // const table = $from.node(1); // Assuming selection is inside a table, get the grandparent node
+  // if (!table || table.type.name !== 'table') {
+  //   console.warn('Selection is not inside a table.');
+  //   return null;
+  // }
+
+  if (!cellAround($from)) {
+    console.warn('Selection is not inside a table.');
+    return null;
+  }
+
+  const tableRect = selectedRect(state);
+  const tablePos = $from.start(-1) - 1; // Position of the table node
+  console.log(
+    'tablePos',
+    tablePos,
+    'tableRect.tableStart',
+    tableRect.tableStart,
+    state.doc.nodeAt(tableRect.tableStart - 1)?.type.name
+  );
+
+  const map = TableMap.get(tableRect.table);
+  const tbody = view.domAtPos(tableRect.tableStart).node?.parentElement;
+  if (!tbody) {
+    console.warn('WARN. Cannot find tbody of table');
+    return null;
+  }
+
+  if (tbody.offsetHeight < maxHeight) {
+    console.log('INFO. Not enough height to split tables.');
+    return;
+  }
+
+  console.log('INFO. Splitting tables');
+  const firstColumnInTable = map.cellsInRect({
+    top: 0,
+    bottom: map.height,
+    left: 0,
+    right: 1,
+  });
+  const tables: {
+    pos: number;
+    absPos: number;
+    lastRowIndex: number;
+    rows: Node[];
+  }[] = [];
+  let height = 0;
+  for (const [index, cellPos] of firstColumnInTable.entries()) {
+    const cellAbsPos = tableRect.tableStart + cellPos;
+    const cell = state.doc.nodeAt(cellAbsPos);
+    if (
+      cell?.type.name !== 'table_cell' &&
+      cell?.type.name !== 'table_header'
+    ) {
+      continue;
+    }
+
+    const cellDom = view.domAtPos(cellAbsPos).node as HTMLElement;
+    if (!cellDom) {
+      continue;
+    }
+
+    if (height + cellDom.offsetHeight > maxHeight) {
+      tables.push({
+        pos: cellPos,
+        absPos: cellAbsPos,
+        lastRowIndex: index,
+        rows: [],
+      });
+      height = 0;
+    }
+
+    height += cellDom.offsetHeight;
+  }
+
+  if (height > 0) {
+    tables.push({
+      pos: -1,
+      absPos: -1,
+      lastRowIndex: firstColumnInTable.length - 1,
+      rows: [],
+    });
+  }
+
+  for (let rowIndex = 0; rowIndex < map.height; rowIndex++) {
+    const row = tableRect.table.child(rowIndex);
+    for (const table of tables) {
+      if (table.lastRowIndex > rowIndex) {
+        table.rows.push(row);
+        break;
       }
     }
-    return null;
-  },
-});
+  }
+
+  if (tables.length === 1) {
+    console.log('INFO. Still 1 table');
+    return;
+  }
+
+  console.log('tables', tables);
+  const { tr } = state;
+  const tableNodeType = state.schema.nodes['table'];
+  let lastPos = -1;
+  for (const [index, table] of tables.entries()) {
+    const newTable = tableNodeType.create(null, Fragment.fromArray(table.rows));
+
+    if (index === 0) {
+      tr.replaceRangeWith(
+        tableRect.tableStart - 1,
+        tableRect.tableStart + tableRect.table.nodeSize,
+        newTable
+      );
+      lastPos = tableRect.tableStart + newTable.nodeSize;
+      continue;
+    }
+
+    if (lastPos <= -1) {
+      console.error(
+        'ERROR. Something wrong the last position must be poistive integer.'
+      );
+      continue;
+    }
+
+    tr.insert(lastPos, newTable);
+    lastPos = lastPos + newTable.nodeSize;
+  }
+
+  console.log('Success. Returning transaction to split tables');
+  return tr;
+}
 
 export function splitTable(state: EditorState, rowIndex: number) {
   const { selection } = state;

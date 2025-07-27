@@ -22,6 +22,7 @@ import {
   tableNodes,
   fixTables,
 } from 'prosemirror-tables';
+import { TableBorder } from '@pages/editor/commands/table';
 
 const existingDocNodeSpec = { ...schema.spec.nodes.get('doc') };
 existingDocNodeSpec.content = 'page+';
@@ -48,6 +49,37 @@ const pageSchemaNodes = addListNodes(
             if (value)
               attrs['style'] =
                 (attrs['style'] || '') + `background-color: ${value};`;
+          },
+        },
+        border: {
+          default: null,
+          getFromDOM(dom) {
+            if (dom.style.border === 'none') {
+              return 'border: none; ';
+            }
+
+            let style = '';
+            if (dom.style.borderTop === 'none') {
+              style += TableBorder.top;
+            }
+
+            if (dom.style.borderRight === 'none') {
+              style += TableBorder.right;
+            }
+
+            if (dom.style.borderBottom === 'none') {
+              style += TableBorder.bottom;
+            }
+
+            if (dom.style.borderLeft === 'none') {
+              style += TableBorder.left;
+            }
+
+            return style ? style : null;
+          },
+          setDOMAttr(value, attrs) {
+            if (value)
+              attrs['style'] = (attrs['style'] || '') + value.toString();
           },
         },
       },

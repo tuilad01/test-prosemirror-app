@@ -4,6 +4,14 @@ import { CellSelection, TableMap, selectedRect } from 'prosemirror-tables';
 import { findParentNodeOfType } from 'prosemirror-utils';
 import { EditorView } from 'prosemirror-view';
 
+export const TableBorder = {
+  none: 'border: none',
+  top: 'border-top: none; ',
+  bottom: 'border-bottom: none; ',
+  right: 'border-right: none; ',
+  left: 'border-left: none; ',
+};
+
 export const insertTable =
   (rows: number, cols: number) =>
   (state: EditorState, dispatch?: (tr: any) => void) => {
