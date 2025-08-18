@@ -21,7 +21,7 @@ import {
   columnResizing,
   tableNodes,
   fixTables,
-} from 'prosemirror-tables';
+} from '../modules/table/index';
 import { TableBorder } from '@pages/editor/commands/table';
 
 const existingDocNodeSpec = { ...schema.spec.nodes.get('doc') };
@@ -46,9 +46,11 @@ const pageSchemaNodes = addListNodes(
             return dom.style.backgroundColor || null;
           },
           setDOMAttr(value, attrs) {
-            if (value)
-              attrs['style'] =
-                (attrs['style'] || '') + `background-color: ${value};`;
+            const color = value ? value : 'white';
+
+            attrs['style'] =
+              (attrs['style'] || '') +
+              `background-color: ${color}; background-clip: padding-box; border: 1px solid; outline: 1px solid black;`;
           },
         },
         border: {

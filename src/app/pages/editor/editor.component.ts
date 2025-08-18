@@ -40,7 +40,7 @@ import {
   selectedRect,
   tableEditing,
   TableMap,
-} from 'prosemirror-tables';
+} from '../../modules/table/index';
 import {
   distributeSelectedColumnsWidth,
   insertTable,
@@ -348,8 +348,81 @@ export class EditorComponent implements OnDestroy {
                   type: 'table_cell',
                   attrs: {
                     colspan: 1,
+                    rowspan: 2,
+                    colwidth: [50],
+                    background: null,
+                  },
+                  content: [
+                    {
+                      type: 'paragraph',
+                      content: [
+                        {
+                          type: 'text',
+                          text: '1',
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  type: 'table_cell',
+                  attrs: {
+                    colspan: 1,
                     rowspan: 1,
-                    colwidth: null,
+                    colwidth: [50],
+                    background: null,
+                  },
+                  content: [
+                    {
+                      type: 'paragraph',
+                      content: [
+                        {
+                          type: 'text',
+                          text: '2',
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  type: 'table_cell',
+                  attrs: {
+                    colspan: 1,
+                    rowspan: 1,
+                    colwidth: [50],
+                    background: null,
+                  },
+                  content: [
+                    {
+                      type: 'paragraph',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'table_row',
+              content: [
+                // {
+                //   type: 'table_cell',
+                //   attrs: {
+                //     colspan: 1,
+                //     rowspan: 1,
+                //     colwidth: [50],
+                //     background: null,
+                //   },
+                //   content: [
+                //     {
+                //       type: 'paragraph',
+                //     },
+                //   ],
+                // },
+                {
+                  type: 'table_cell',
+                  attrs: {
+                    colspan: 1,
+                    rowspan: 1,
+                    colwidth: [50],
                     background: null,
                   },
                   content: [
@@ -363,21 +436,7 @@ export class EditorComponent implements OnDestroy {
                   attrs: {
                     colspan: 1,
                     rowspan: 1,
-                    colwidth: null,
-                    background: null,
-                  },
-                  content: [
-                    {
-                      type: 'paragraph',
-                    },
-                  ],
-                },
-                {
-                  type: 'table_cell',
-                  attrs: {
-                    colspan: 1,
-                    rowspan: 1,
-                    colwidth: null,
+                    colwidth: [50],
                     background: null,
                   },
                   content: [
@@ -396,7 +455,7 @@ export class EditorComponent implements OnDestroy {
                   attrs: {
                     colspan: 1,
                     rowspan: 1,
-                    colwidth: null,
+                    colwidth: [50],
                     background: null,
                   },
                   content: [
@@ -410,7 +469,7 @@ export class EditorComponent implements OnDestroy {
                   attrs: {
                     colspan: 1,
                     rowspan: 1,
-                    colwidth: null,
+                    colwidth: [50],
                     background: null,
                   },
                   content: [
@@ -424,54 +483,7 @@ export class EditorComponent implements OnDestroy {
                   attrs: {
                     colspan: 1,
                     rowspan: 1,
-                    colwidth: null,
-                    background: null,
-                  },
-                  content: [
-                    {
-                      type: 'paragraph',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              type: 'table_row',
-              content: [
-                {
-                  type: 'table_cell',
-                  attrs: {
-                    colspan: 1,
-                    rowspan: 1,
-                    colwidth: null,
-                    background: null,
-                  },
-                  content: [
-                    {
-                      type: 'paragraph',
-                    },
-                  ],
-                },
-                {
-                  type: 'table_cell',
-                  attrs: {
-                    colspan: 1,
-                    rowspan: 1,
-                    colwidth: null,
-                    background: null,
-                  },
-                  content: [
-                    {
-                      type: 'paragraph',
-                    },
-                  ],
-                },
-                {
-                  type: 'table_cell',
-                  attrs: {
-                    colspan: 1,
-                    rowspan: 1,
-                    colwidth: null,
+                    colwidth: [50],
                     background: null,
                   },
                   content: [
@@ -490,7 +502,7 @@ export class EditorComponent implements OnDestroy {
                   attrs: {
                     colspan: 1,
                     rowspan: 1,
-                    colwidth: null,
+                    colwidth: [50],
                     background: null,
                   },
                   content: [
@@ -504,7 +516,7 @@ export class EditorComponent implements OnDestroy {
                   attrs: {
                     colspan: 1,
                     rowspan: 1,
-                    colwidth: null,
+                    colwidth: [50],
                     background: null,
                   },
                   content: [
@@ -518,7 +530,7 @@ export class EditorComponent implements OnDestroy {
                   attrs: {
                     colspan: 1,
                     rowspan: 1,
-                    colwidth: null,
+                    colwidth: [50],
                     background: null,
                   },
                   content: [
@@ -531,20 +543,20 @@ export class EditorComponent implements OnDestroy {
             },
           ],
         },
-        {
-          type: imageBlockNodeName,
-        },
-        {
-          type: imageBlockNodeName,
-        },
-        {
-          type: imageBlockNodeName,
-        },
-        {
-          type: customListNodeName,
-          attrs: { column: 3 },
-          content: [{ type: customListItemNodeName }],
-        },
+        // {
+        //   type: imageBlockNodeName,
+        // },
+        // {
+        //   type: imageBlockNodeName,
+        // },
+        // {
+        //   type: imageBlockNodeName,
+        // },
+        // {
+        //   type: customListNodeName,
+        //   attrs: { column: 3 },
+        //   content: [{ type: customListItemNodeName }],
+        // },
         {
           type: 'paragraph',
           content: [
@@ -626,6 +638,9 @@ export class EditorComponent implements OnDestroy {
     }
     this.view = new EditorView(editorElements[editorElements.length - 1], {
       state: state,
+      attributes: {
+        class: 'editor-content',
+      },
       nodeViews: {
         [imageBlockNodeName]: (node, view, getPos, decorations) => {
           return new ImageBlockNodeView(node, view, getPos, decorations);

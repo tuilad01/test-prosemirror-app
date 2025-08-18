@@ -7,7 +7,7 @@ import {
   Transaction,
   TextSelection,
 } from 'prosemirror-state';
-import { cellAround, selectedRect, TableMap } from 'prosemirror-tables';
+import { cellAround, selectedRect, TableMap } from '../modules/table/index';
 import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
 import { measureBlockHeights2 } from './page-break-plugin2';
 

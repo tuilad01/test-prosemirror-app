@@ -1,3 +1,5 @@
+@import url("./../../modules/table/styles/tables.css");
+
 .ProseMirror {
     padding: 1rem;
 }
@@ -12,4 +14,9 @@
     display: flex;
     gap: 8px;
     border: 1px solid #333;
+}
+
+.editor-content table {
+    border-collapse: separate;
+    border-spacing: 0;
 }

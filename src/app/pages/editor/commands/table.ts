@@ -1,6 +1,10 @@
 import { EditorState, Transaction } from 'prosemirror-state';
 import { SchemaNode } from '../nodes/const';
-import { CellSelection, TableMap, selectedRect } from 'prosemirror-tables';
+import {
+  CellSelection,
+  TableMap,
+  selectedRect,
+} from '../../../modules/table/index';
 import { findParentNodeOfType } from 'prosemirror-utils';
 import { EditorView } from 'prosemirror-view';
 
