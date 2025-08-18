@@ -345,15 +345,16 @@ function draggedWidth(
   const width = Math.max(resizeMinWidth, dragging.startWidth + offset);
 
   // calculate next cell width
-  if (
-    draggedNextCell &&
-    dragging.nextCellStartWidth &&
-    width >= resizeMinWidth
-  ) {
-    draggedNextCell.width = Math.max(
-      resizeMinWidth,
-      dragging.nextCellStartWidth - offset
-    );
+  if (draggedNextCell && dragging.nextCellStartWidth) {
+    if (width === resizeMinWidth) {
+      draggedNextCell.width =
+        dragging.startWidth - resizeMinWidth + dragging.nextCellStartWidth;
+    } else {
+      draggedNextCell.width = Math.max(
+        resizeMinWidth,
+        dragging.nextCellStartWidth - offset
+      );
+    }
   }
 
   return width;
