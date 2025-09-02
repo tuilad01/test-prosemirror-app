@@ -2,27 +2,28 @@ import { schema } from 'prosemirror-schema-basic';
 import { addListNodes } from 'prosemirror-schema-list';
 import { Fragment, Schema } from 'prosemirror-model';
 import { Node } from 'prosemirror-model';
-import { fontSizeMark } from '../prosemirror-marks/font-size-mark';
-import { fontFamilyMark } from '../prosemirror-marks/font-family-mark';
+import { fontSizeMark } from '../marks/font-size-mark';
+import { fontFamilyMark } from '../marks/font-family-mark';
 import {
   imageBlockNodeName,
   imageBlockNodeSpec,
-} from '@app/prosemirror-nodes/image-block';
+} from '@app/prosemirror/nodes/image-block';
 import {
   customListNodeName,
   customListNodeSpec,
-} from '@app/prosemirror-nodes/custom-list';
+} from '@app/prosemirror/nodes/custom-list';
 import {
   customListItemNodeName,
   customListItemNodeSpec,
-} from '@app/prosemirror-nodes/custom-list-item';
+} from '@app/prosemirror/nodes/custom-list-item';
 import {
   tableEditing,
   columnResizing,
   tableNodes,
   fixTables,
-} from '../modules/table/index';
+} from '../../prosemirror/modules/table/index';
 import { TableBorder } from '@pages/editor/commands/table';
+import { dynamicValueNodeName, dynamicValueNodeSpec } from '@app/prosemirror/nodes/dynamic-value';
 
 const existingDocNodeSpec = { ...schema.spec.nodes.get('doc') };
 existingDocNodeSpec.content = 'page+';
@@ -86,7 +87,8 @@ const pageSchemaNodes = addListNodes(
         },
       },
     })
-  );
+  )
+  .addToEnd(dynamicValueNodeName, dynamicValueNodeSpec);
 //.addBefore('paragraph', headerNodeName, headerNodeSpec)
 //.addBefore('paragraph', 'pageContent', contentNodeSpec)
 //.addBefore('paragraph', 'pageFooter', footerNodeSpec)

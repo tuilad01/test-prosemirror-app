@@ -1,4 +1,4 @@
-import { headerNodeName } from '@app/prosemirror-nodes/page-header';
+import { headerNodeName } from '@app/prosemirror/nodes/page-header';
 import { Fragment, Node } from 'prosemirror-model';
 import {
   PluginKey,

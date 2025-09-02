@@ -15,22 +15,22 @@ import { EditorState, Selection, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { Mark } from 'prosemirror-model';
 import { exampleSetup } from 'prosemirror-example-setup';
-import { pageSchema } from '@app/prosemirror-schema/page-schema';
+import { pageSchema } from '@app/prosemirror/schema/page-schema';
 import { Node } from 'prosemirror-model';
-import { selectionPlugin } from '@app/prosemirror-plugin/selection-plugin';
+import { selectionPlugin } from '@app/prosemirror/plugins/selection-plugin';
 import { Router } from '@angular/router';
-import { editableHeaderNodeName } from '@app/prosemirror-nodes/editable-header-nodeview';
-import { headerNodeName } from '@app/prosemirror-nodes/page-header';
-import { decorationPlugin } from '@app/prosemirror-plugin/decoration-plugin';
+import { editableHeaderNodeName } from '@app/prosemirror/nodes/editable-header-nodeview';
+import { headerNodeName } from '@app/prosemirror/nodes/page-header';
+import { decorationPlugin } from '@app/prosemirror/plugins/decoration-plugin';
 import {
   imageBlockNodeName,
   ImageBlockNodeView,
-} from '@app/prosemirror-nodes/image-block';
-import { customListNodeName } from '@app/prosemirror-nodes/custom-list';
+} from '@app/prosemirror/nodes/image-block';
+import { customListNodeName } from '@app/prosemirror/nodes/custom-list';
 import {
   customListItemNodeName,
   customListItemNodeView,
-} from '@app/prosemirror-nodes/custom-list-item';
+} from '@app/prosemirror/nodes/custom-list-item';
 import { keymap } from 'prosemirror-keymap';
 import {
   cellAround,
@@ -40,7 +40,7 @@ import {
   selectedRect,
   tableEditing,
   TableMap,
-} from '../../modules/table/index';
+} from '../../prosemirror/modules/table/index';
 import {
   distributeSelectedColumnsWidth,
   insertTable,
@@ -51,7 +51,7 @@ import { liftListItem } from 'prosemirror-schema-list';
 import {
   splitTable,
   splitTablePlugin,
-} from '@app/prosemirror-plugin/split-table-plugin';
+} from '@app/prosemirror/plugins/split-table-plugin';
 
 @Component({
   selector: 'app-editor',

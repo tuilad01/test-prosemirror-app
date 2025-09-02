@@ -4,7 +4,7 @@ import {
   CellSelection,
   TableMap,
   selectedRect,
-} from '../../../modules/table/index';
+} from '../../../prosemirror/modules/table/index';
 import { findParentNodeOfType } from 'prosemirror-utils';
 import { EditorView } from 'prosemirror-view';
 

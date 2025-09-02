@@ -1,5 +1,5 @@
 import { EditorState, Plugin, Transaction } from 'prosemirror-state';
-import { pageSchema } from '../prosemirror-schema/page-schema';
+import { pageSchema } from '../schema/page-schema';
 import { EditorView } from 'prosemirror-view';
 import { DOMSerializer, Fragment, Node, Schema } from 'prosemirror-model';
 import { nodes } from 'prosemirror-schema-basic';

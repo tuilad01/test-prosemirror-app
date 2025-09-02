@@ -17,24 +17,24 @@ import { Schema, DOMParser, NodeSpec, Mark } from 'prosemirror-model';
 import { marks, schema } from 'prosemirror-schema-basic';
 import { addListNodes } from 'prosemirror-schema-list';
 import { exampleSetup } from 'prosemirror-example-setup';
-import { pageBreakPlugin } from './prosemirror-plugin/page-break-plugin';
-import { createPage, pageSchema } from './prosemirror-schema/page-schema';
+import { pageBreakPlugin } from './prosemirror/plugins/page-break-plugin';
+import { createPage, pageSchema } from './prosemirror/schema/page-schema';
 import { Node } from 'prosemirror-model';
 import {
   pageBreakPlugin2,
   repaginate,
   repaginate2,
-} from './prosemirror-plugin/page-break-plugin2';
+} from './prosemirror/plugins/page-break-plugin2';
 import {
   canJoin,
   MapResult,
   ReplaceStep,
   StepMap,
 } from 'prosemirror-transform';
-import { createParagraph } from './prosemirror-nodes/paragraph';
+import { createParagraph } from './prosemirror/nodes/paragraph';
 import { toggleMark } from 'prosemirror-commands';
-import { fontSizeMark } from './prosemirror-marks/font-size-mark';
-import { selectionPlugin } from './prosemirror-plugin/selection-plugin';
+import { fontSizeMark } from './prosemirror/marks/font-size-mark';
+import { selectionPlugin } from './prosemirror/plugins/selection-plugin';
 import { RouterOutlet } from '@angular/router';
 import { EditorComponent } from '@pages/editor/editor.component';
 class TransactionType {

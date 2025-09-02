@@ -1,4 +1,4 @@
-import { headerNodeName } from '@app/prosemirror-nodes/page-header';
+import { headerNodeName } from '@app/prosemirror/nodes/page-header';
 import { PluginKey, Plugin, EditorState, Transaction } from 'prosemirror-state';
 import { Decoration, DecorationSet } from 'prosemirror-view';
 

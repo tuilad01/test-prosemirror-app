@@ -1,7 +1,7 @@
 import {
   handleArrowLeftChecklistCommand,
   removeEmptyListItemAndInsertParagraph,
-} from '@app/prosemirror-nodes/custom-list-item';
+} from '@app/nodes/custom-list-item';
 import { keymap } from 'prosemirror-keymap';
 import { Transaction } from 'prosemirror-state';
 import { ReplaceStep } from 'prosemirror-transform';
