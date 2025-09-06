@@ -2,14 +2,14 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   {
-    path: '',
+    path: 'drag-drop',
     loadComponent: () =>
       import('@pages/drag-drop/drag-drop.component').then(
         (component) => component.DragDropComponent
       ),
   },
   {
-    path: 'editor-page',
+    path: '',
     loadComponent: () =>
       import('@pages/editor/editor.component').then(
         (component) => component.EditorComponent

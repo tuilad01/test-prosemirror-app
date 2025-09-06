@@ -52,15 +52,90 @@ import {
   splitTable,
   splitTablePlugin,
 } from '@app/prosemirror/plugins/split-table-plugin';
+import { MenubarModule } from 'primeng/menubar';
+import { MenuItem } from 'primeng/api';
 
 @Component({
   selector: 'app-editor',
-  imports: [FormsModule],
+  imports: [FormsModule, MenubarModule],
   templateUrl: './editor.component.html',
   styleUrl: './editor.component.css',
   encapsulation: ViewEncapsulation.None,
 })
 export class EditorComponent implements OnDestroy {
+  menuItems: MenuItem[] = [
+    {
+      id: 'insertNewPage',
+      label: 'Insert new page',
+      command: () => this.insertNewPage(),
+    },
+    {
+      id: 'exportJSon',
+      label: 'Export JSON',
+      command: () => this.exportJSon(),
+    },
+    {
+      id: 'findNextBlock',
+      label: 'Find next block',
+      command: () => this.findNextBlock(),
+    },
+    {
+      id: 'increaseFontSize',
+      label: 'Increase font size',
+      command: () => this.increaseFontSize(),
+    },
+    { id: 'keepFocus', label: 'Keep focus', command: () => this.keepFocus() },
+    { id: 'navigate', label: 'Navigate', command: () => this.navigate() },
+    {
+      id: 'insertImage',
+      label: 'Insert image',
+      command: () => this.insertImage(),
+    },
+
+    {
+      id: 'insertEditableHeader',
+      label: 'Insert editable header',
+      command: () => this.handleInsertEditableHeader(),
+    },
+    {
+      id: 'insertHeader',
+      label: 'Insert header',
+      command: () => this.handleInsertHeader(),
+    },
+    {
+      id: 'insertTable',
+      label: 'Insert table',
+      command: () => this.handleInsertTable(),
+    },
+    {
+      id: 'distributeCells',
+      label: 'Distribute cells',
+      command: () => this.handleDistributeCells(),
+    },
+
+    {
+      id: 'toggleFontSize',
+      label: 'Set font size 40',
+      command: () => this.handleToggleFontSize(),
+    },
+
+    {
+      id: 'removeList',
+      label: 'Remove list',
+      command: () => this.handleRemoveList(),
+    },
+    {
+      id: 'splitTable',
+      label: 'Split table',
+      command: () => this.handleSplitTable(),
+    },
+    {
+      id: 'setBorderNone',
+      label: 'Set border none',
+      command: () => this.handleSetBorderNone(),
+    },
+  ];
+
   handleSetBorderNone() {
     if (!this.view) return;
 

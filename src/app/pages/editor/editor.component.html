@@ -1,26 +1,8 @@
 <!-- <div id="content">
   <div class="page" page-number="1">Hello</div>
 </div> -->
-
+<p-menubar [model]="menuItems"></p-menubar>
 <div>
-  <button (click)="insertNewPage()">Insert new page</button>
-  <button (click)="exportJSon()">export json</button>
-  <button (click)="findNextBlock()">find next block</button>
-  <button (click)="increaseFontSize()">increase font size</button>
-  <button (click)="keepFocus()">keep focus</button>
-  <button (click)="navigate()">navigate</button>
-  <button (click)="insertImage()">insert image</button>
-
-  <button (click)="handleInsertEditableHeader()">insert editable header</button>
-  <button (click)="handleInsertHeader()">insert header</button>
-  <button (click)="handleInsertTable()">insert table</button>
-  <button (click)="handleDistributeCells()">Distribute cells</button>
-
-  <button (click)="handleToggleFontSize()">Set font size 40</button>
-
-  <button (click)="handleRemoveList()">Remove list</button>
-  <button (click)="handleSplitTable()">Split table</button>
-  <button (click)="handleSetBorderNone()">Set border none</button>
   <div>
     <input
       type="text"

@@ -1,11 +1,12 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import "tailwindcss";
+@import "../node_modules/prosemirror-view/style/prosemirror.css";
+@import "../node_modules/prosemirror-example-setup/style/style.css";
+@import "../node_modules/prosemirror-gapcursor/style/gapcursor.css";
+@import "../node_modules/prosemirror-menu/style/menu.css";
 @plugin "tailwindcss-primeui";
-@import "./../node_modules/prosemirror-view/style/prosemirror.css",
-@import "./../node_modules/prosemirror-example-setup/style/style.css",
-@import "./../node_modules/prosemirror-gapcursor/style/gapcursor.css",
-@import "./../node_modules/prosemirror-menu/style/menu.css";
+
 
 table {
   font-family: arial, sans-serif;
