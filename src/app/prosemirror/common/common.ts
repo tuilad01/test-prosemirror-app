@@ -9,7 +9,8 @@ export type Attr = {
 export function updateAttrs(node: Node, nodeName: string, updatedAttrs: Attr) {
   const tr = new Transform(node);
   if (node.type.name === nodeName) {
-    for (const key in updatedAttrs) {
+    const attrs = node.attrs ?? {};
+    for (const key in attrs) {
       tr.setDocAttribute(key, updatedAttrs[key]);
     }
   }

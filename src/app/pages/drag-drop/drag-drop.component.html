@@ -1,0 +1,17 @@
+<p>drag-drop works!</p>
+<p-button label="123"></p-button>
+<div
+  class="example-list ml-4 w-60 overflow-hidden bg-white"
+  cdkDropList
+  (cdkDropListDropped)="drop($event)"
+>
+  @for (item of items; track item) {
+    <div
+      class="example-box flex cursor-default rounded-sm border bg-blue-500 shadow-md"
+      cdkDrag
+    >
+      <div class="w-6 cursor-grabbing bg-red-500" cdkDragHandle></div>
+      <div class="p-4">{{ item.name }}</div>
+    </div>
+  }
+</div>

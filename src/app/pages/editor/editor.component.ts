@@ -57,7 +57,7 @@ import {
   selector: 'app-editor',
   imports: [FormsModule],
   templateUrl: './editor.component.html',
-  styleUrl: './editor.component.scss',
+  styleUrl: './editor.component.css',
   encapsulation: ViewEncapsulation.None,
 })
 export class EditorComponent implements OnDestroy {
