@@ -5,6 +5,7 @@
 @import "../node_modules/prosemirror-example-setup/style/style.css";
 @import "../node_modules/prosemirror-gapcursor/style/gapcursor.css";
 @import "../node_modules/prosemirror-menu/style/menu.css";
+@import "../src/app/prosemirror/modules/table/styles/tables.css";
 @plugin "tailwindcss-primeui";
 
 

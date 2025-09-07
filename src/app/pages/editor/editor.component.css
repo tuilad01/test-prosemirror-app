@@ -1,4 +1,4 @@
-@import url("./../../prosemirror/modules/table/styles/tables.css");
+@import '../../../styles.css';
 
 .ProseMirror {
     padding: 1rem;
@@ -19,4 +19,7 @@
 .editor-content table {
     border-collapse: separate;
     border-spacing: 0;
+}
+.editor-content {
+    @apply w-[50%];
 }

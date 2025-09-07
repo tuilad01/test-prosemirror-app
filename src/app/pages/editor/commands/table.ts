@@ -3,10 +3,12 @@ import { SchemaNode } from '../nodes/const';
 import {
   CellSelection,
   TableMap,
+  cellAround,
   selectedRect,
 } from '../../../prosemirror/modules/table/index';
 import { findParentNodeOfType } from 'prosemirror-utils';
 import { EditorView } from 'prosemirror-view';
+import { splitTable } from '@app/prosemirror/plugins/split-table-plugin';
 
 export const TableBorder = {
   none: 'border: none',
@@ -166,3 +168,67 @@ export const distributeSelectedColumnsWidth = (
 
   return false;
 };
+export function handleSetBorderNone(view: EditorView) {
+  if (!view) return;
+
+  const { state, dispatch } = view;
+  const { tr } = state;
+  const cellAroundResult = cellAround(state.selection.$from);
+  if (!cellAroundResult) {
+    console.warn('WARN. No cell around.');
+    return;
+  }
+
+  const tableRect = selectedRect(state);
+  if (!tableRect) {
+    console.warn('WARN. Not selection in table.');
+    return;
+  }
+
+  const tableMap = TableMap.get(tableRect.table);
+
+  const cellsInRect = tableMap.cellsInRect(tableRect);
+  let hasChanged = false;
+  for (const cellPos of cellsInRect) {
+    const cellAbsPos = cellPos + tableRect.tableStart;
+    const cell = state.doc.nodeAt(cellAbsPos);
+    if (
+      cell &&
+      (cell.type.name === 'table_cell' || cell?.type.name === 'table_header')
+    ) {
+      hasChanged = true;
+      tr.setNodeMarkup(cellAbsPos, undefined, {
+        ...cell.attrs,
+        border: TableBorder.left + TableBorder.right,
+      });
+    }
+  }
+
+  if (hasChanged) {
+    dispatch(tr.scrollIntoView());
+  }
+}
+export function handleSplitTable(view: EditorView) {
+  const tr = splitTable(view?.state!, 2);
+  if (tr) {
+    view?.dispatch(tr);
+  }
+}
+
+export function handleDistributeCells(view: EditorView) {
+  if (!view) {
+    return;
+  }
+  const { state, dispatch } = view;
+  const { tr, selection, schema } = state;
+
+  distributeSelectedColumnsWidth(state, view, dispatch);
+}
+export function handleInsertTable(view: EditorView) {
+  if (!view) {
+    return;
+  }
+  const { state, dispatch } = view;
+  const { tr, selection, schema } = state;
+  insertTable(4, 3)(state, dispatch);
+}

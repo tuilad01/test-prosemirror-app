@@ -7,12 +7,12 @@
     <input
       type="text"
       [(ngModel)]="textFontSizeInput"
-      (keyup)="handleEnter($event)"
+      (keyup)="handleEnter(view, $event)"
     />
     <input
       type="text"
       [(ngModel)]="textFontFamilyInput"
-      (keyup)="handleEnterFontFamily($event)"
+      (keyup)="handleEnterFontFamily(view, $event)"
     />
   </div>
 </div>
