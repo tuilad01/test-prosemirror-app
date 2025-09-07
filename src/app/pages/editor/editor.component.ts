@@ -199,7 +199,7 @@ export class EditorComponent implements OnDestroy {
   exportJSon() {
     console.log(this.view?.state.doc.toJSON());
   }
-
+  // init editor view
   private initEditor() {
     const doc = Node.fromJSON(this.mySchema, initalDocument);
 
