@@ -1,251 +1,272 @@
 export const initalDocument = {
-      type: 'doc',
+  type: 'doc',
+  content: [
+    {
+      type: 'paragraph',
       content: [
         {
-          type: 'paragraph',
-          content: [
-            {
-              type: 'text',
-              text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-            },
-          ],
+          type: 'text',
+          text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
         },
+      ],
+    },
+    {
+      type: 'table',
+      content: [
         {
-          type: 'table',
+          type: 'table_row',
           content: [
             {
-              type: 'table_row',
+              type: 'table_cell',
+              attrs: {
+                colspan: 1,
+                rowspan: 2,
+                colwidth: [50],
+                background: null,
+              },
               content: [
                 {
-                  type: 'table_cell',
-                  attrs: {
-                    colspan: 1,
-                    rowspan: 2,
-                    colwidth: [50],
-                    background: null,
-                  },
+                  type: 'paragraph',
                   content: [
                     {
-                      type: 'paragraph',
-                      content: [
-                        {
-                          type: 'text',
-                          text: '1',
-                        },
-                      ],
-                    },
-                  ],
-                },
-                {
-                  type: 'table_cell',
-                  attrs: {
-                    colspan: 1,
-                    rowspan: 1,
-                    colwidth: [50],
-                    background: null,
-                  },
-                  content: [
-                    {
-                      type: 'paragraph',
-                      content: [
-                        {
-                          type: 'text',
-                          text: '2',
-                        },
-                      ],
-                    },
-                  ],
-                },
-                {
-                  type: 'table_cell',
-                  attrs: {
-                    colspan: 1,
-                    rowspan: 1,
-                    colwidth: [50],
-                    background: null,
-                  },
-                  content: [
-                    {
-                      type: 'paragraph',
+                      type: 'text',
+                      text: '1',
                     },
                   ],
                 },
               ],
             },
             {
-              type: 'table_row',
+              type: 'table_cell',
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [50],
+                background: null,
+              },
               content: [
-                // {
-                //   type: 'table_cell',
-                //   attrs: {
-                //     colspan: 1,
-                //     rowspan: 1,
-                //     colwidth: [50],
-                //     background: null,
-                //   },
-                //   content: [
-                //     {
-                //       type: 'paragraph',
-                //     },
-                //   ],
-                // },
                 {
-                  type: 'table_cell',
-                  attrs: {
-                    colspan: 1,
-                    rowspan: 1,
-                    colwidth: [50],
-                    background: null,
-                  },
+                  type: 'paragraph',
                   content: [
                     {
-                      type: 'paragraph',
-                    },
-                  ],
-                },
-                {
-                  type: 'table_cell',
-                  attrs: {
-                    colspan: 1,
-                    rowspan: 1,
-                    colwidth: [50],
-                    background: null,
-                  },
-                  content: [
-                    {
-                      type: 'paragraph',
+                      type: 'text',
+                      text: '2',
                     },
                   ],
                 },
               ],
             },
             {
-              type: 'table_row',
+              type: 'table_cell',
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [50],
+                background: null,
+              },
               content: [
                 {
-                  type: 'table_cell',
-                  attrs: {
-                    colspan: 1,
-                    rowspan: 1,
-                    colwidth: [50],
-                    background: null,
-                  },
-                  content: [
-                    {
-                      type: 'paragraph',
-                    },
-                  ],
-                },
-                {
-                  type: 'table_cell',
-                  attrs: {
-                    colspan: 1,
-                    rowspan: 1,
-                    colwidth: [50],
-                    background: null,
-                  },
-                  content: [
-                    {
-                      type: 'paragraph',
-                    },
-                  ],
-                },
-                {
-                  type: 'table_cell',
-                  attrs: {
-                    colspan: 1,
-                    rowspan: 1,
-                    colwidth: [50],
-                    background: null,
-                  },
-                  content: [
-                    {
-                      type: 'paragraph',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              type: 'table_row',
-              content: [
-                {
-                  type: 'table_cell',
-                  attrs: {
-                    colspan: 1,
-                    rowspan: 1,
-                    colwidth: [50],
-                    background: null,
-                  },
-                  content: [
-                    {
-                      type: 'paragraph',
-                    },
-                  ],
-                },
-                {
-                  type: 'table_cell',
-                  attrs: {
-                    colspan: 1,
-                    rowspan: 1,
-                    colwidth: [50],
-                    background: null,
-                  },
-                  content: [
-                    {
-                      type: 'paragraph',
-                    },
-                  ],
-                },
-                {
-                  type: 'table_cell',
-                  attrs: {
-                    colspan: 1,
-                    rowspan: 1,
-                    colwidth: [50],
-                    background: null,
-                  },
-                  content: [
-                    {
-                      type: 'paragraph',
-                    },
-                  ],
+                  type: 'paragraph',
                 },
               ],
             },
           ],
         },
-        // {
-        //   type: imageBlockNodeName,
-        // },
-        // {
-        //   type: imageBlockNodeName,
-        // },
-        // {
-        //   type: imageBlockNodeName,
-        // },
-        // {
-        //   type: customListNodeName,
-        //   attrs: { column: 3 },
-        //   content: [{ type: customListItemNodeName }],
-        // },
         {
-          type: 'paragraph',
+          type: 'table_row',
           content: [
+            // {
+            //   type: 'table_cell',
+            //   attrs: {
+            //     colspan: 1,
+            //     rowspan: 1,
+            //     colwidth: [50],
+            //     background: null,
+            //   },
+            //   content: [
+            //     {
+            //       type: 'paragraph',
+            //     },
+            //   ],
+            // },
             {
-              type: 'text',
-              text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+              type: 'table_cell',
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [50],
+                background: null,
+              },
+              content: [
+                {
+                  type: 'paragraph',
+                },
+              ],
+            },
+            {
+              type: 'table_cell',
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [50],
+                background: null,
+              },
+              content: [
+                {
+                  type: 'paragraph',
+                },
+              ],
             },
           ],
         },
         {
-          type: 'paragraph',
+          type: 'table_row',
           content: [
             {
-              type: 'text',
-              text: 'orem ac tempus lacinia, velit mauris dignissim odio, venenatis faucibus eros lorem accumsan mauris. Ma',
+              type: 'table_cell',
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [50],
+                background: null,
+              },
+              content: [
+                {
+                  type: 'paragraph',
+                },
+              ],
+            },
+            {
+              type: 'table_cell',
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [50],
+                background: null,
+              },
+              content: [
+                {
+                  type: 'paragraph',
+                },
+              ],
+            },
+            {
+              type: 'table_cell',
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [50],
+                background: null,
+              },
+              content: [
+                {
+                  type: 'paragraph',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'table_row',
+          content: [
+            {
+              type: 'table_cell',
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [50],
+                background: null,
+              },
+              content: [
+                {
+                  type: 'paragraph',
+                },
+              ],
+            },
+            {
+              type: 'table_cell',
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [50],
+                background: null,
+              },
+              content: [
+                {
+                  type: 'paragraph',
+                },
+              ],
+            },
+            {
+              type: 'table_cell',
+              attrs: {
+                colspan: 1,
+                rowspan: 1,
+                colwidth: [50],
+                background: null,
+              },
+              content: [
+                {
+                  type: 'paragraph',
+                },
+              ],
             },
           ],
         },
       ],
-    };
+    },
+    // {
+    //   type: imageBlockNodeName,
+    // },
+    // {
+    //   type: imageBlockNodeName,
+    // },
+    // {
+    //   type: imageBlockNodeName,
+    // },
+    // {
+    //   type: customListNodeName,
+    //   attrs: { column: 3 },
+    //   content: [{ type: customListItemNodeName }],
+    // },
+    {
+      type: 'paragraph',
+      content: [
+        {
+          type: 'text',
+          text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+        },
+      ],
+    },
+    {
+      type: 'paragraph',
+      content: [
+        {
+          type: 'text',
+          text: 'orem ac tempus lacinia, velit mauris dignissim odio, venenatis faucibus eros lorem accumsan mauris. Ma',
+        },
+      ],
+    },
+    {
+      type: 'page_break',
+    },
+    {
+      type: 'paragraph',
+      content: [
+        {
+          type: 'text',
+          text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+        },
+      ],
+    },
+    {
+      type: 'paragraph',
+      content: [
+        {
+          type: 'text',
+          text: 'orem ac tempus lacinia, velit mauris dignissim odio, venenatis faucibus eros lorem accumsan mauris. Ma',
+        },
+      ],
+    },
+  ],
+};

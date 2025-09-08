@@ -21,5 +21,8 @@
     border-spacing: 0;
 }
 .editor-content {
-    @apply w-[50%];
+    @apply w-[50%] border;
+}
+.page-break {
+    @apply h-0.25 bg-amber-500;
 }

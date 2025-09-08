@@ -24,6 +24,7 @@ import {
 } from '../../prosemirror/modules/table/index';
 import { TableBorder } from '@pages/editor/commands/table';
 import { dynamicValueNodeName, dynamicValueNodeSpec } from '@app/prosemirror/nodes/dynamic-value';
+import { pageBreakNodeName, pageBreakNodeSpec } from '../nodes/page-break';
 
 const existingDocNodeSpec = { ...schema.spec.nodes.get('doc') };
 existingDocNodeSpec.content = 'page+';
@@ -88,7 +89,8 @@ const pageSchemaNodes = addListNodes(
       },
     })
   )
-  .addToEnd(dynamicValueNodeName, dynamicValueNodeSpec);
+  .addToEnd(dynamicValueNodeName, dynamicValueNodeSpec)
+  .addToEnd(pageBreakNodeName, pageBreakNodeSpec);
 //.addBefore('paragraph', headerNodeName, headerNodeSpec)
 //.addBefore('paragraph', 'pageContent', contentNodeSpec)
 //.addBefore('paragraph', 'pageFooter', footerNodeSpec)
