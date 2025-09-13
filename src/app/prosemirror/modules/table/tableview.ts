@@ -1,7 +1,7 @@
 import { Node } from 'prosemirror-model';
 import { NodeView, ViewMutationRecord } from 'prosemirror-view';
 import { CellAttrs } from './util';
-
+import { v4 as uuidv4 } from 'uuid';
 /**
  * @public
  */
@@ -10,11 +10,17 @@ export class TableView implements NodeView {
   public table: HTMLTableElement;
   public colgroup: HTMLTableColElement;
   public contentDOM: HTMLTableSectionElement;
+  public input: HTMLInputElement;
 
-  constructor(public node: Node, public defaultCellMinWidth: number) {
+  constructor(
+    public node: Node,
+    public defaultCellMinWidth: number
+  ) {
     this.dom = document.createElement('div');
     this.dom.className = 'tableWrapper';
     this.table = this.dom.appendChild(document.createElement('table'));
+    const tableId = uuidv4();
+    this.table.setAttribute('data-formula-table-id', tableId);
     this.table.style.setProperty(
       '--default-cell-min-width',
       `${defaultCellMinWidth}px`
@@ -22,6 +28,24 @@ export class TableView implements NodeView {
     this.colgroup = this.table.appendChild(document.createElement('colgroup'));
     updateColumnsOnResize(node, this.colgroup, this.table, defaultCellMinWidth);
     this.contentDOM = this.table.appendChild(document.createElement('tbody'));
+
+    this.input = document.createElement('input');
+    this.input.type = 'text';
+    this.input.className = 'formula-table-input';
+    this.input.style.position = 'abosolute';
+    this.input.contentEditable = 'false';
+    this.input.setAttribute('data-formula-table-id', tableId);
+    requestAnimationFrame(() => {
+      const tableRect = this.table.getBoundingClientRect();
+
+      const rect =
+        tableRect.width < 743 ? tableRect : this.dom.getBoundingClientRect();
+      console.log(rect);
+      this.input.style.top = rect.top + 'px';
+      this.input.style.left = rect.right + 1 + 'px';
+    });
+
+    document.body.appendChild(this.input);
   }
 
   update(node: Node): boolean {
@@ -32,6 +56,13 @@ export class TableView implements NodeView {
       this.table,
       this.defaultCellMinWidth
     );
+    const tableRect = this.table.getBoundingClientRect();
+
+    const rect =
+      tableRect.width < 743 ? tableRect : this.dom.getBoundingClientRect();
+    console.log('update rect', rect);
+    this.input.style.top = rect.top + 'px';
+    this.input.style.left = rect.right + 1 + 'px';
     return true;
   }
 

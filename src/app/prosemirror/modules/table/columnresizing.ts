@@ -121,7 +121,10 @@ export function columnResizing({
  * @public
  */
 export class ResizeState {
-  constructor(public activeHandle: number, public dragging: Dragging | false) {}
+  constructor(
+    public activeHandle: number,
+    public dragging: Dragging | false
+  ) {}
 
   apply(tr: Transaction): ResizeState {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -223,6 +226,13 @@ function handleMouseDown(
     })
   );
 
+  const formulaTableInputs = document.querySelectorAll<HTMLInputElement>(
+    '.formula-table-input'
+  );
+  for (const formulaTableInput of formulaTableInputs) {
+    formulaTableInput.style.visibility = 'hidden';
+  }
+
   function finish(event: MouseEvent) {
     win.removeEventListener('mouseup', finish);
     win.removeEventListener('mousemove', move);
@@ -241,6 +251,13 @@ function handleMouseDown(
       view.dispatch(
         view.state.tr.setMeta(columnResizingPluginKey, { setDragging: null })
       );
+
+      const formulaTableInputs = document.querySelectorAll<HTMLInputElement>(
+        '.formula-table-input'
+      );
+      for (const formulaTableInput of formulaTableInputs) {
+        formulaTableInput.style.visibility = 'visible';
+      }
     }
   }
 

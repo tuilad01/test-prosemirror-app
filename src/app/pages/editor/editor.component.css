@@ -1,28 +1,42 @@
-@import '../../../styles.css';
+@reference '../../../styles.css';
 
+#editor {
+  @apply flex justify-center bg-gray-400 py-40;
+}
 .ProseMirror {
-    padding: 1rem;
+  padding: 1rem;
 }
 .image-block-node {
-    display: inline-flex;
-    width: 200px;
-    height: 250px;
-    flex-direction: column;
-    border: 1px solid #000;
+  display: inline-flex;
+  width: 200px;
+  height: 250px;
+  flex-direction: column;
+  border: 1px solid #000;
 }
 .custom-list-item-node {
-    display: flex;
-    gap: 8px;
-    border: 1px solid #333;
+  display: flex;
+  gap: 8px;
+  border: 1px solid #333;
 }
 
 .editor-content table {
-    border-collapse: separate;
-    border-spacing: 0;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 .editor-content {
-    @apply w-[50%] border;
+  @apply w-[50%] border bg-white;
 }
 .page-break {
-    @apply h-0.25 bg-amber-500;
+  @apply h-0.25 bg-amber-500;
+}
+
+.tableWrapper {
+  @apply relative;
+}
+
+.formula-table-input {
+  @apply absolute top-0 left-[100%] border;
+}
+.formula-table-input {
+  @apply bg-white;
 }

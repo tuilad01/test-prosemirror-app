@@ -164,7 +164,7 @@ export class EditorComponent implements OnDestroy {
   view!: EditorView;
   pageNumber: number = 1;
   editorRef = viewChild<ElementRef<HTMLDivElement>>('editor');
-  
+
   private router = inject(Router);
 
   constructor() {
@@ -172,8 +172,7 @@ export class EditorComponent implements OnDestroy {
       const textFontSizeInput = this.textFontSizeInput();
     });
 
-    afterNextRender(() => {
-    });
+    afterNextRender(() => {});
   }
 
   // Mix the nodes from prosemirror-schema-list into the basic schema to
@@ -250,7 +249,7 @@ export class EditorComponent implements OnDestroy {
           'Shift-Tab': goToNextCell(-1),
         }),
         splitTablePlugin,
-        ...exampleSetup({ schema: this.mySchema }),
+        ...exampleSetup({ schema: this.mySchema, menuBar: false }),
         selectionPlugin(this.view),
         //footerPlugin,
         decorationPlugin,
