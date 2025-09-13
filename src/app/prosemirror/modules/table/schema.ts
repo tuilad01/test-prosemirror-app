@@ -156,6 +156,7 @@ export function tableNodes(options: TableNodesOptions): TableNodes {
   return {
     table: {
       content: 'table_row+',
+      attrs: { formula: { default: null } },
       tableRole: 'table',
       isolating: true,
       group: options.tableGroup,

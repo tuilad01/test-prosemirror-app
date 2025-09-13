@@ -11,7 +11,7 @@ export class TableView implements NodeView {
   public colgroup: HTMLTableColElement;
   public contentDOM: HTMLTableSectionElement;
   public input: HTMLInputElement;
-
+  public handleInputChange: (e: Event) => void;
   constructor(
     public node: Node,
     public defaultCellMinWidth: number
@@ -19,8 +19,8 @@ export class TableView implements NodeView {
     this.dom = document.createElement('div');
     this.dom.className = 'tableWrapper';
     this.table = this.dom.appendChild(document.createElement('table'));
-    const tableId = uuidv4();
-    this.table.setAttribute('data-formula-table-id', tableId);
+    // const tableId = uuidv4();
+    // this.table.setAttribute('data-formula-table-id', tableId);
     this.table.style.setProperty(
       '--default-cell-min-width',
       `${defaultCellMinWidth}px`
@@ -34,7 +34,16 @@ export class TableView implements NodeView {
     this.input.className = 'formula-table-input';
     this.input.style.position = 'abosolute';
     this.input.contentEditable = 'false';
-    this.input.setAttribute('data-formula-table-id', tableId);
+
+    const debounceSaveFormula = this.debounce(
+      (value: string) => console.log(value),
+      1000
+    );
+    this.handleInputChange = (e: Event) => {
+      debounceSaveFormula((e.target as HTMLInputElement).value);
+    };
+    this.input.addEventListener('input', this.handleInputChange);
+    // this.input.setAttribute('data-formula-table-id', tableId);
     requestAnimationFrame(() => {
       const tableRect = this.table.getBoundingClientRect();
 
@@ -46,6 +55,20 @@ export class TableView implements NodeView {
     });
 
     document.body.appendChild(this.input);
+  }
+
+  debounce<T extends (...args: any[]) => any>(
+    func: T,
+    delay: number
+  ): (...args: Parameters<T>) => void {
+    let timer: ReturnType<typeof setTimeout>;
+
+    return (...args: Parameters<T>): void => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        func(...args);
+      }, delay);
+    };
   }
 
   update(node: Node): boolean {
@@ -71,6 +94,11 @@ export class TableView implements NodeView {
       record.type == 'attributes' &&
       (record.target == this.table || this.colgroup.contains(record.target))
     );
+  }
+
+  destroy() {
+    this.input.removeEventListener('input', this.handleInputChange);
+    this.input.remove();
   }
 }
 

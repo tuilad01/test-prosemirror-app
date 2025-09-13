@@ -35,6 +35,7 @@ import { keymap } from 'prosemirror-keymap';
 import {
   cellAround,
   columnResizing,
+  deleteTable,
   fixTables,
   goToNextCell,
   selectedRect,
@@ -87,6 +88,11 @@ export class EditorComponent implements OnDestroy {
       id: 'insertNewPage',
       label: 'Insert new page',
       command: () => insertNewPage(this.view, 1),
+    },
+    {
+      id: 'deleteTable',
+      label: 'Delete table',
+      command: () => deleteTable(this.view.state, this.view.dispatch),
     },
     {
       id: 'exportJSon',
