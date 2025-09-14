@@ -73,9 +73,7 @@ export function columnResizing({
         const tableName = tableNodeTypes(state.schema).table.name;
         if (View && nodeViews) {
           nodeViews[tableName] = (node, view) => {
-            const tableNodeView = new View(node, defaultCellMinWidth, view);
-            // TODO: store tableNodeView to update formula table input if document is changed.
-            return tableNodeView;
+            return new View(node, defaultCellMinWidth, view);
           };
         }
         return new ResizeState(-1, false);

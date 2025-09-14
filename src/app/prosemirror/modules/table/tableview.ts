@@ -1,5 +1,5 @@
 import { Node } from 'prosemirror-model';
-import { NodeView, ViewMutationRecord } from 'prosemirror-view';
+import { EditorView, NodeView, ViewMutationRecord } from 'prosemirror-view';
 import { CellAttrs } from './util';
 import { v4 as uuidv4 } from 'uuid';
 /**
@@ -10,11 +10,15 @@ export class TableView implements NodeView {
   public table: HTMLTableElement;
   public colgroup: HTMLTableColElement;
   public contentDOM: HTMLTableSectionElement;
-  public input: HTMLInputElement;
-  public handleInputChange: (e: Event) => void;
+  public input?: HTMLInputElement;
+  public handleInputChange?: (e: Event) => void;
+  public resizeObserver?: ResizeObserver;
+  public mutationObserver?: MutationObserver;
+
   constructor(
     public node: Node,
-    public defaultCellMinWidth: number
+    public defaultCellMinWidth: number,
+    public view: EditorView
   ) {
     this.dom = document.createElement('div');
     this.dom.className = 'tableWrapper';
@@ -43,18 +47,40 @@ export class TableView implements NodeView {
       debounceSaveFormula((e.target as HTMLInputElement).value);
     };
     this.input.addEventListener('input', this.handleInputChange);
-    // this.input.setAttribute('data-formula-table-id', tableId);
-    requestAnimationFrame(() => {
-      const tableRect = this.table.getBoundingClientRect();
-
-      const rect =
-        tableRect.width < 743 ? tableRect : this.dom.getBoundingClientRect();
-      console.log(rect);
-      this.input.style.top = rect.top + 'px';
-      this.input.style.left = rect.right + 1 + 'px';
-    });
+    this.updateInputPosition = this.updateInputPosition.bind(this);
+    if (this.input) {
+      requestAnimationFrame(() => {
+        this.updateInputPosition();
+      });
+    }
 
     document.body.appendChild(this.input);
+    this.mutationObserver = new MutationObserver(() => {
+      console.log('MutationObserver run');
+
+      this.updateInputPosition();
+    });
+
+    this.mutationObserver.observe(view.dom, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+    });
+  }
+
+  updateInputPosition() {
+    if (!this.input) {
+      return;
+    }
+    requestAnimationFrame(() => {
+      const tableRect = this.table.getBoundingClientRect();
+      const tableWrapperRect = this.dom.getBoundingClientRect();
+      this.input!.style.top = tableWrapperRect.top + 'px';
+      this.input!.style.left =
+        tableRect.width < 743
+          ? tableRect.right + 1 + 'px'
+          : tableWrapperRect.right + 1 + 'px';
+    });
   }
 
   debounce<T extends (...args: any[]) => any>(
@@ -79,13 +105,7 @@ export class TableView implements NodeView {
       this.table,
       this.defaultCellMinWidth
     );
-    const tableRect = this.table.getBoundingClientRect();
-
-    const rect =
-      tableRect.width < 743 ? tableRect : this.dom.getBoundingClientRect();
-    console.log('update rect', rect);
-    this.input.style.top = rect.top + 'px';
-    this.input.style.left = rect.right + 1 + 'px';
+    this.updateInputPosition();
     return true;
   }
 
@@ -97,8 +117,19 @@ export class TableView implements NodeView {
   }
 
   destroy() {
-    this.input.removeEventListener('input', this.handleInputChange);
-    this.input.remove();
+    if (this.mutationObserver) {
+      console.log('disconect mutationobserver');
+      this.mutationObserver.disconnect();
+    }
+    if (this.input) {
+      if (this.handleInputChange) {
+        console.log('remove event handleinputchange');
+
+        this.input.removeEventListener('input', this.handleInputChange);
+      }
+      console.log('remove input elemnet');
+      this.input.remove();
+    }
   }
 }
 

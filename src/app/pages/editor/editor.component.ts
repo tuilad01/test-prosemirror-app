@@ -41,6 +41,7 @@ import {
   selectedRect,
   tableEditing,
   TableMap,
+  TableView,
 } from '../../prosemirror/modules/table/index';
 import {
   distributeSelectedColumnsWidth,
@@ -170,6 +171,7 @@ export class EditorComponent implements OnDestroy {
   view!: EditorView;
   pageNumber: number = 1;
   editorRef = viewChild<ElementRef<HTMLDivElement>>('editor');
+  tableNodeViews: TableView[] = [];
 
   private router = inject(Router);
 
