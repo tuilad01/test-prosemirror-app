@@ -13,7 +13,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { EditorState, Selection, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
-import { Mark } from 'prosemirror-model';
+import { Fragment, Mark } from 'prosemirror-model';
 import { exampleSetup } from 'prosemirror-example-setup';
 import { pageSchema } from '@app/prosemirror/schema/page-schema';
 import { Node } from 'prosemirror-model';
@@ -74,6 +74,8 @@ import {
 } from './commands/mark';
 import { insertImage } from './commands/image';
 import { handleRemoveList } from './commands/list';
+import { Transform } from 'prosemirror-transform';
+import { combineDocuments } from '@app/prosemirror/common/common';
 @Component({
   selector: 'app-editor',
   imports: [FormsModule, MenubarModule],
@@ -208,8 +210,11 @@ export class EditorComponent implements OnDestroy {
   }
   // init editor view
   private initEditor() {
-    const doc = Node.fromJSON(this.mySchema, initalDocument);
-
+    const strDocument = JSON.stringify(initalDocument);
+    let combinedDocuments: Node | null = combineDocuments(this.mySchema, [strDocument, strDocument]);
+    
+    // const doc = Node.fromJSON(this.mySchema, initalDocument);
+    const doc = combinedDocuments!;
     const findNextBlock = (transaction: Transaction) => {
       const nodeAfter = Selection.findFrom(
         transaction.doc.resolve(transaction.selection.$from.after() + 1),
@@ -256,7 +261,7 @@ export class EditorComponent implements OnDestroy {
           Tab: goToNextCell(1),
           'Shift-Tab': goToNextCell(-1),
         }),
-        splitTablePlugin,
+        // splitTablePlugin,
         ...exampleSetup({ schema: this.mySchema, menuBar: false }),
         selectionPlugin(this.view),
         //footerPlugin,

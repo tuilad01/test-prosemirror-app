@@ -36,7 +36,7 @@ export class TableView implements NodeView {
     this.input = document.createElement('input');
     this.input.type = 'text';
     this.input.className = 'formula-table-input';
-    this.input.style.position = 'abosolute';
+    this.input.style.position = 'fixed';
     this.input.contentEditable = 'false';
 
     const debounceSaveFormula = this.debounce(
@@ -47,16 +47,16 @@ export class TableView implements NodeView {
       debounceSaveFormula((e.target as HTMLInputElement).value);
     };
     this.input.addEventListener('input', this.handleInputChange);
-    this.updateInputPosition = this.updateInputPosition.bind(this);
-    if (this.input) {
-      requestAnimationFrame(() => {
-        this.updateInputPosition();
-      });
-    }
+    // this.updateInputPosition = this.updateInputPosition.bind(this);
+    // if (this.input) {
+    //   requestAnimationFrame(() => {
+    //     this.updateInputPosition();
+    //   });
+    // }
 
     document.body.appendChild(this.input);
     this.mutationObserver = new MutationObserver(() => {
-      console.log('MutationObserver run');
+      // console.log('MutationObserver run');
 
       this.updateInputPosition();
     });
@@ -66,6 +66,11 @@ export class TableView implements NodeView {
       childList: true,
       subtree: true,
     });
+    this.updateInputPosition();
+
+    window.addEventListener('scroll', () => {
+      this.updateInputPosition();
+    }, true)
   }
 
   updateInputPosition() {
@@ -75,6 +80,9 @@ export class TableView implements NodeView {
     requestAnimationFrame(() => {
       const tableRect = this.table.getBoundingClientRect();
       const tableWrapperRect = this.dom.getBoundingClientRect();
+      // console.log('tableRect', tableRect);
+      // console.log('tableWrapperRect', tableWrapperRect);
+      // console.log('tableWrapperRect.top', tableWrapperRect.top);
       this.input!.style.top = tableWrapperRect.top + 'px';
       this.input!.style.left =
         tableRect.width < 743
@@ -117,17 +125,18 @@ export class TableView implements NodeView {
   }
 
   destroy() {
+    console.log('destroy');
     if (this.mutationObserver) {
-      console.log('disconect mutationobserver');
+      // console.log('disconect mutationobserver');
       this.mutationObserver.disconnect();
     }
     if (this.input) {
       if (this.handleInputChange) {
-        console.log('remove event handleinputchange');
+        // console.log('remove event handleinputchange');
 
         this.input.removeEventListener('input', this.handleInputChange);
       }
-      console.log('remove input elemnet');
+      // console.log('remove input elemnet');
       this.input.remove();
     }
   }
