@@ -14,6 +14,7 @@ export class TableView implements NodeView {
   public handleInputChange?: (e: Event) => void;
   public resizeObserver?: ResizeObserver;
   public mutationObserver?: MutationObserver;
+  handleScroll: () => void;
 
   constructor(
     public node: Node,
@@ -67,10 +68,10 @@ export class TableView implements NodeView {
       subtree: true,
     });
     this.updateInputPosition();
-
-    window.addEventListener('scroll', () => {
+    this.handleScroll = () => {
       this.updateInputPosition();
-    }, true)
+    };
+    window.addEventListener('scroll', this.handleScroll, true);
   }
 
   updateInputPosition() {
@@ -80,9 +81,6 @@ export class TableView implements NodeView {
     requestAnimationFrame(() => {
       const tableRect = this.table.getBoundingClientRect();
       const tableWrapperRect = this.dom.getBoundingClientRect();
-      // console.log('tableRect', tableRect);
-      // console.log('tableWrapperRect', tableWrapperRect);
-      // console.log('tableWrapperRect.top', tableWrapperRect.top);
       this.input!.style.top = tableWrapperRect.top + 'px';
       this.input!.style.left =
         tableRect.width < 743
@@ -125,18 +123,16 @@ export class TableView implements NodeView {
   }
 
   destroy() {
-    console.log('destroy');
+    if (this.handleScroll) {
+      window.removeEventListener('scroll', this.handleScroll);
+    }
     if (this.mutationObserver) {
-      // console.log('disconect mutationobserver');
       this.mutationObserver.disconnect();
     }
     if (this.input) {
       if (this.handleInputChange) {
-        // console.log('remove event handleinputchange');
-
         this.input.removeEventListener('input', this.handleInputChange);
       }
-      // console.log('remove input elemnet');
       this.input.remove();
     }
   }

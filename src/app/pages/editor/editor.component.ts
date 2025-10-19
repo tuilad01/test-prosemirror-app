@@ -75,94 +75,29 @@ import {
 import { insertImage } from './commands/image';
 import { handleRemoveList } from './commands/list';
 import { Transform } from 'prosemirror-transform';
-import { combineDocuments } from '@app/prosemirror/common/common';
+import {
+  combineDocuments,
+  combineJsonDocuments,
+} from '@app/prosemirror/common/common';
+import { zoomIn, zoomIn2, zoomOut } from './commands/editor';
+import { getDefaultMenu } from './menu/default-menu';
+import { Menu } from './menu/menu';
+import { blockHeightPlugin } from '@app/prosemirror/plugins/page-plugin/block-height-plugin';
+import { EditorViewService } from './services/editor-view.service';
 @Component({
   selector: 'app-editor',
   imports: [FormsModule, MenubarModule],
   templateUrl: './editor.component.html',
   styleUrl: './editor.component.css',
   encapsulation: ViewEncapsulation.None,
+  providers: [EditorViewService],
 })
 export class EditorComponent implements OnDestroy {
   handleEnter = handleEnter;
   handleEnterFontFamily = handleEnterFontFamily;
-  menuItems: MenuItem[] = [
-    {
-      id: 'insertNewPage',
-      label: 'Insert new page',
-      command: () => insertNewPage(this.view, 1),
-    },
-    {
-      id: 'deleteTable',
-      label: 'Delete table',
-      command: () => deleteTable(this.view.state, this.view.dispatch),
-    },
-    {
-      id: 'exportJSon',
-      label: 'Export JSON',
-      command: () => this.exportJSon(),
-    },
-    {
-      id: 'findNextBlock',
-      label: 'Find next block',
-      command: () => this.findNextBlock(),
-    },
-    {
-      id: 'increaseFontSize',
-      label: 'Increase font size',
-      command: () => increaseFontSize(this.view),
-    },
-    { id: 'keepFocus', label: 'Keep focus', command: () => this.keepFocus() },
-    { id: 'navigate', label: 'Navigate', command: () => this.navigate() },
-    {
-      id: 'insertImage',
-      label: 'Insert image',
-      command: () => insertImage(this.view),
-    },
+  readonly menu: Menu;
+  menuItems: MenuItem[] = [];
 
-    {
-      id: 'insertEditableHeader',
-      label: 'Insert editable header',
-      command: () => handleInsertEditableHeader(this.view),
-    },
-    {
-      id: 'insertHeader',
-      label: 'Insert header',
-      command: () => handleInsertHeader(this.view),
-    },
-    {
-      id: 'insertTable',
-      label: 'Insert table',
-      command: () => handleInsertTable(this.view),
-    },
-    {
-      id: 'distributeCells',
-      label: 'Distribute cells',
-      command: () => handleDistributeCells(this.view),
-    },
-
-    {
-      id: 'toggleFontSize',
-      label: 'Set font size 40',
-      command: () => handleToggleFontSize(this.view),
-    },
-
-    {
-      id: 'removeList',
-      label: 'Remove list',
-      command: () => handleRemoveList(this.view),
-    },
-    {
-      id: 'splitTable',
-      label: 'Split table',
-      command: () => handleSplitTable(this.view),
-    },
-    {
-      id: 'setBorderNone',
-      label: 'Set border none',
-      command: () => handleSetBorderNone(this.view),
-    },
-  ];
   index = 0;
   textFontFamilyInput = model<string | undefined>();
   textFontSizeInput: ModelSignal<number | undefined> = model<
@@ -175,14 +110,20 @@ export class EditorComponent implements OnDestroy {
   editorRef = viewChild<ElementRef<HTMLDivElement>>('editor');
   tableNodeViews: TableView[] = [];
 
-  private router = inject(Router);
+  //private router = inject(Router);
 
   constructor() {
+    this.menu = getDefaultMenu();
+    this.menuItems = this.menu.items.map((item) => ({
+      ...item,
+      command: () => item.command(this.view),
+    }));
+
     effect(() => {
       const textFontSizeInput = this.textFontSizeInput();
     });
 
-    afterNextRender(() => {});
+
   }
 
   // Mix the nodes from prosemirror-schema-list into the basic schema to
@@ -192,11 +133,11 @@ export class EditorComponent implements OnDestroy {
   }
 
   navigate() {
-    const url = this.router.routerState.snapshot.url.includes('create')
-      ? 'editor/123'
-      : 'editor/create';
-    //this.router.navigate([url], { onSameUrlNavigation: 'reload',  });
-    window.location.replace('/#/' + url);
+    // const url = this.router.routerState.snapshot.url.includes('create')
+    //   ? 'editor/123'
+    //   : 'editor/create';
+    // //this.router.navigate([url], { onSameUrlNavigation: 'reload',  });
+    // window.location.replace('/#/' + url);
   }
 
   keepFocus() {
@@ -211,8 +152,26 @@ export class EditorComponent implements OnDestroy {
   // init editor view
   private initEditor() {
     const strDocument = JSON.stringify(initalDocument);
-    let combinedDocuments: Node | null = combineDocuments(this.mySchema, [strDocument, strDocument]);
-    
+    // let combinedDocuments: Node | null = combineDocuments(this.mySchema, [strDocument, strDocument]);
+    let combinedDocuments: Node | null = combineJsonDocuments(this.mySchema, [
+      strDocument,
+      strDocument,
+      strDocument,
+      strDocument,
+      strDocument,
+      strDocument,
+      strDocument,
+      strDocument,
+      strDocument,
+      strDocument,
+      strDocument,
+      strDocument,
+      strDocument,
+      strDocument,
+      strDocument,
+    ]);
+    console.log(combinedDocuments);
+
     // const doc = Node.fromJSON(this.mySchema, initalDocument);
     const doc = combinedDocuments!;
     const findNextBlock = (transaction: Transaction) => {
@@ -263,10 +222,11 @@ export class EditorComponent implements OnDestroy {
         }),
         // splitTablePlugin,
         ...exampleSetup({ schema: this.mySchema, menuBar: false }),
-        selectionPlugin(this.view),
+        // selectionPlugin(this.view),
         //footerPlugin,
         decorationPlugin,
         //pageBreakPlugin2(this.view),
+        blockHeightPlugin(),
       ],
     });
 
@@ -274,7 +234,7 @@ export class EditorComponent implements OnDestroy {
     if (fix) {
       state = state.apply(fix.setMeta('addToHistory', false));
     }
-    this.view = new EditorView(editorElements[editorElements.length - 1], {
+    this.view = new EditorView(this.editorRef()!.nativeElement, {
       state: state,
       attributes: {
         class: 'editor-content',

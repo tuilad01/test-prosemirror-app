@@ -47,7 +47,10 @@ export function updateDynamicValueAttr(node: Node, dynamicValues: Attr) {
 
   return tr.doc;
 }
-export function combineDocuments(schema: Schema, documents: string[]) {
+export function combineDocuments(
+  schema: Schema,
+  documents: string[]
+): Node | null {
   let combinedDocuments: Node | null = null;
   for (let index = 0; index < 2; index++) {
     const doc = Node.fromJSON(schema, documents[index]);
@@ -61,4 +64,26 @@ export function combineDocuments(schema: Schema, documents: string[]) {
     combinedDocuments = tr.doc;
   }
   return combinedDocuments;
+}
+
+export type JsonDocument = {
+  attrs: { [key: string]: any };
+  type: 'doc';
+  content: any[];
+};
+export function combineJsonDocuments(
+  schema: Schema,
+  documents: string[]
+): Node | null {
+  let combinedDocuments: JsonDocument | null = null;
+  for (let index = 0; index < 10; index++) {
+    const json = JSON.parse(documents[index]);
+    if (!combinedDocuments) {
+      combinedDocuments = json;
+      continue;
+    }
+
+    combinedDocuments.content = [...combinedDocuments.content, ...json.content];
+  }
+  return Node.fromJSON(schema, combinedDocuments);
 }
