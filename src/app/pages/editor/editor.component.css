@@ -24,7 +24,7 @@
   border-spacing: 0;
 }
 .editor-content {
-  @apply w-[50%] border bg-white;
+  @apply w-[794px] border bg-white;
 }
 .page-break {
   @apply h-0.25 bg-amber-500;

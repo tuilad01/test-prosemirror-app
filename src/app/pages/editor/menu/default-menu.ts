@@ -27,9 +27,13 @@ export const getDefaultMenu = () => {
     )
   );
   menu.add(
-    new MenuItem('insertNewPage5', 'Insert new page', (view) =>
-      insertNewPage(view, 1)
-    )
+    new MenuItem('isnertDom', 'insert dom to measurement view', (view, options) => {
+      if (!options?.measurementView) {
+        return;
+      }
+
+      
+    })
   );
 
   return menu;

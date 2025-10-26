@@ -106,8 +106,13 @@ export class EditorComponent implements OnDestroy {
   fontSize = 20;
   mySchema = pageSchema;
   view!: EditorView;
+  measurementView!: EditorView;
   pageNumber: number = 1;
+
   editorRef = viewChild<ElementRef<HTMLDivElement>>('editor');
+  measurementEditorRef =
+    viewChild<ElementRef<HTMLDivElement>>('measurementEditor');
+
   tableNodeViews: TableView[] = [];
 
   //private router = inject(Router);
@@ -116,14 +121,13 @@ export class EditorComponent implements OnDestroy {
     this.menu = getDefaultMenu();
     this.menuItems = this.menu.items.map((item) => ({
       ...item,
-      command: () => item.command(this.view),
+      command: () =>
+        item.command(this.view, { measurementView: this.measurementView }),
     }));
 
     effect(() => {
       const textFontSizeInput = this.textFontSizeInput();
     });
-
-
   }
 
   // Mix the nodes from prosemirror-schema-list into the basic schema to
@@ -208,6 +212,33 @@ export class EditorComponent implements OnDestroy {
     }
     const editorElements = document.querySelectorAll('#editor');
     //this.view = new EditorView(editorDom!.nativeElement as HTMLElement, {
+
+    const stateForMeasurementView = EditorState.create({
+      schema: this.mySchema,
+      plugins: [
+        columnResizing(),
+        tableEditing(),
+        ...exampleSetup({ schema: this.mySchema, menuBar: false }),
+      ],
+    });
+    this.measurementView = new EditorView(
+      this.measurementEditorRef()!.nativeElement,
+      {
+        state: stateForMeasurementView,
+        attributes: {
+          class: 'editor-content',
+        },
+        nodeViews: {
+          [imageBlockNodeName]: (node, view, getPos, decorations) => {
+            return new ImageBlockNodeView(node, view, getPos, decorations);
+          },
+          [customListItemNodeName]: (node, view, getPos, decorations) => {
+            return new customListItemNodeView(node, view, getPos, decorations);
+          },
+        },
+      }
+    );
+
     let state = EditorState.create({
       schema: this.mySchema,
       doc: doc,
@@ -226,7 +257,7 @@ export class EditorComponent implements OnDestroy {
         //footerPlugin,
         decorationPlugin,
         //pageBreakPlugin2(this.view),
-        blockHeightPlugin(),
+        blockHeightPlugin({ measurementView: this.measurementView }),
       ],
     });
 

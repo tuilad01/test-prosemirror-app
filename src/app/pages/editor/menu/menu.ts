@@ -25,7 +25,7 @@ export class MenuItem {
   constructor(
     public id: string,
     public label: string,
-    public command: (view: EditorView) => void,
+    public command: (view: EditorView, options?: { measurementView?: EditorView }) => void,
     public options?: MenuItemOption
   ) {}
 }

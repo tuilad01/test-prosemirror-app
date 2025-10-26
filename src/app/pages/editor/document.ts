@@ -11,6 +11,25 @@ export const initalDocument = {
       ],
     },
     {
+      type: 'bullet_list',
+      content: [
+        {
+          type: 'list_item',
+          content: [
+            {
+              type: 'paragraph',
+              content: [
+                {
+                  type: 'text',
+                  text: 'First bullet point content.',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
       type: 'table',
       content: [
         {
