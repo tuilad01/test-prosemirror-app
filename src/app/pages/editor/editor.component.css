@@ -40,3 +40,6 @@
 .formula-table-input {
   @apply bg-white;
 }
+.editor-content ul {
+  @apply list-disc;
+}

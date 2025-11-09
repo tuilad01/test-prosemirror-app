@@ -1,16 +1,79 @@
-import { deleteTable } from '@app/prosemirror/modules/table';
+import {
+  deleteTable,
+  selectedRect,
+  tableNodeTypes,
+} from '@app/prosemirror/modules/table';
 import { insertNewPage } from '../commands/page';
 import { Menu, MenuItem } from './menu';
 import { EditorView } from 'prosemirror-view';
+import { contains } from 'prosemirror-utils';
+import { liftListItem } from 'prosemirror-schema-list';
+import { fixTable, fixTables } from '@app/prosemirror/modules/table/fixtables';
+import { NodeSelection } from 'prosemirror-state';
+import { normalizeSelection } from '@app/prosemirror/modules/table/cellselection';
 
 export const getDefaultMenu = () => {
   const menu = new Menu();
 
   menu.add(
-    new MenuItem('insertNewPage1', 'Insert new page', (view) =>
-      insertNewPage(view, 1)
-    )
+    new MenuItem('splitListBullet', 'Split List Bulletin', (view) => {
+      const { state, dispatch } = view;
+      const { selection, tr } = state;
+
+      tr.split(selection.from, 2);
+
+      dispatch(tr);
+    })
   );
+  menu.add(
+    new MenuItem('liftList', 'Lift List', (view) => {
+      const { state, dispatch } = view;
+      const { selection, tr } = state;
+      liftListItem(state.schema.nodes['list_item'])(state, dispatch);
+
+      // dispatch(tr);
+    })
+  );
+  menu.add(
+    new MenuItem('joinBlock', 'Join Block', (view) => {
+      const { state, dispatch } = view;
+      const { selection, tr } = state;
+      tr.join(selection.$from.before(1), 1);
+
+      dispatch(tr);
+    })
+  );
+  menu.add(
+    new MenuItem('splitTable', 'Split table', (view) => {
+      const { state, dispatch } = view;
+      const { selection, tr } = state;
+      const tableRect = selectedRect(state);
+      const tableEnd = tableRect.tableStart + tableRect.table.content.size;
+      const rowEndPos = selection.$from.after(selection.$from.depth - 2);
+      if (rowEndPos === tableEnd) {
+        console.warn('WARN. Cannot split the last row of the table.');
+        return;
+      }
+      const rowIndex = selection.$from.index(1);
+      console.log(rowIndex, 'rowIndex');
+      tr.split(rowEndPos, 1);
+      tr.setSelection(NodeSelection.create(tr.doc, rowEndPos + 1))
+      dispatch(tr);
+      const newTr = view.state.tr;
+      normalizeSelection(view.state, newTr, true);
+      if (newTr.docChanged) {
+        console.log('ther is newTr');
+        
+        dispatch(newTr);
+      }
+
+      // fixTables(view.state, state);
+      
+      const nodeAfter = view.state.doc.resolve(rowEndPos + 2);
+      console.log(nodeAfter, 'nodeAfter');
+    })
+  );
+
   menu.add(
     new MenuItem('insertNewPage2', 'Insert new page', (view) =>
       insertNewPage(view, 1)
@@ -27,12 +90,36 @@ export const getDefaultMenu = () => {
     )
   );
   menu.add(
-    new MenuItem('isnertDom', 'insert dom to measurement view', (view, options) => {
-      if (!options?.measurementView) {
-        return;
+    new MenuItem(
+      'isnertDom',
+      'insert dom to measurement view',
+      (view, options) => {
+        if (!options?.measurementView) {
+          return;
+        }
       }
+    )
+  );
+  menu.add(
+    new MenuItem('swapDom', 'swap elements', (view, options) => {
+      console.log('swap elements');
+      const { state } = view;
+      const { $from, $to } = state.selection;
 
-      
+      const para2 = view.dom.children[2];
+      const para3 = view.dom.children[3];
+
+      const temp = document.createElement('div');
+
+      para2.parentNode?.insertBefore(temp, para2);
+
+      // para3.parentNode?.insertBefore(para3, para2);
+
+      temp.parentNode?.insertBefore(para3, temp);
+
+      temp.parentNode?.removeChild(temp);
+
+      console.log(view.state.doc, 'view.state.doc');
     })
   );
 

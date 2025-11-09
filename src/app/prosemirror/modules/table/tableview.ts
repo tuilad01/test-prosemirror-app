@@ -14,7 +14,7 @@ export class TableView implements NodeView {
   public handleInputChange?: (e: Event) => void;
   public resizeObserver?: ResizeObserver;
   public mutationObserver?: MutationObserver;
-  handleScroll: () => void;
+  // handleScroll: () => void;
 
   constructor(
     public node: Node,
@@ -34,20 +34,20 @@ export class TableView implements NodeView {
     updateColumnsOnResize(node, this.colgroup, this.table, defaultCellMinWidth);
     this.contentDOM = this.table.appendChild(document.createElement('tbody'));
 
-    this.input = document.createElement('input');
-    this.input.type = 'text';
-    this.input.className = 'formula-table-input';
-    this.input.style.position = 'fixed';
-    this.input.contentEditable = 'false';
+    // this.input = document.createElement('input');
+    // this.input.type = 'text';
+    // this.input.className = 'formula-table-input';
+    // this.input.style.position = 'fixed';
+    // this.input.contentEditable = 'false';
 
-    const debounceSaveFormula = this.debounce(
-      (value: string) => console.log(value),
-      1000
-    );
-    this.handleInputChange = (e: Event) => {
-      debounceSaveFormula((e.target as HTMLInputElement).value);
-    };
-    this.input.addEventListener('input', this.handleInputChange);
+    // const debounceSaveFormula = this.debounce(
+    //   (value: string) => console.log(value),
+    //   1000
+    // );
+    // this.handleInputChange = (e: Event) => {
+    //   debounceSaveFormula((e.target as HTMLInputElement).value);
+    // };
+    // this.input.addEventListener('input', this.handleInputChange);
     // this.updateInputPosition = this.updateInputPosition.bind(this);
     // if (this.input) {
     //   requestAnimationFrame(() => {
@@ -55,23 +55,23 @@ export class TableView implements NodeView {
     //   });
     // }
 
-    document.body.appendChild(this.input);
-    this.mutationObserver = new MutationObserver(() => {
-      // console.log('MutationObserver run');
+    // document.body.appendChild(this.input);
+    // this.mutationObserver = new MutationObserver(() => {
+    //   // console.log('MutationObserver run');
 
-      this.updateInputPosition();
-    });
+    //   this.updateInputPosition();
+    // });
 
-    this.mutationObserver.observe(view.dom, {
-      attributes: true,
-      childList: true,
-      subtree: true,
-    });
-    this.updateInputPosition();
-    this.handleScroll = () => {
-      this.updateInputPosition();
-    };
-    window.addEventListener('scroll', this.handleScroll, true);
+    // this.mutationObserver.observe(view.dom, {
+    //   attributes: true,
+    //   childList: true,
+    //   subtree: true,
+    // });
+    // this.updateInputPosition();
+    // this.handleScroll = () => {
+    //   this.updateInputPosition();
+    // };
+    // window.addEventListener('scroll', this.handleScroll, true);
   }
 
   updateInputPosition() {
@@ -111,7 +111,7 @@ export class TableView implements NodeView {
       this.table,
       this.defaultCellMinWidth
     );
-    this.updateInputPosition();
+    // this.updateInputPosition();
     return true;
   }
 
@@ -123,18 +123,18 @@ export class TableView implements NodeView {
   }
 
   destroy() {
-    if (this.handleScroll) {
-      window.removeEventListener('scroll', this.handleScroll);
-    }
-    if (this.mutationObserver) {
-      this.mutationObserver.disconnect();
-    }
-    if (this.input) {
-      if (this.handleInputChange) {
-        this.input.removeEventListener('input', this.handleInputChange);
-      }
-      this.input.remove();
-    }
+    // if (this.handleScroll) {
+    //   window.removeEventListener('scroll', this.handleScroll);
+    // }
+    // if (this.mutationObserver) {
+    //   this.mutationObserver.disconnect();
+    // }
+    // if (this.input) {
+    //   if (this.handleInputChange) {
+    //     this.input.removeEventListener('input', this.handleInputChange);
+    //   }
+    //   this.input.remove();
+    // }
   }
 }
 

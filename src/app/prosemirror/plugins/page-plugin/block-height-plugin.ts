@@ -39,7 +39,7 @@ export function blockHeightPlugin(config?: any) {
         // 2. update for each transaction
         const step = tr.steps[0];
         const action = ActionFactory.create(tr, step);
-        console.log(action, 'action');
+        // console.log(action, 'action');
         if (action) {
           action.handle({
             view: editorView!,

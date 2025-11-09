@@ -84,6 +84,8 @@ import { getDefaultMenu } from './menu/default-menu';
 import { Menu } from './menu/menu';
 import { blockHeightPlugin } from '@app/prosemirror/plugins/page-plugin/block-height-plugin';
 import { EditorViewService } from './services/editor-view.service';
+import { table5x10WithMergedCells } from './data/table-5x10-merged-cells';
+import { table5x10WithMergedRows } from './data/table-5x10-merged-rows';
 @Component({
   selector: 'app-editor',
   imports: [FormsModule, MenubarModule],
@@ -155,29 +157,17 @@ export class EditorComponent implements OnDestroy {
   }
   // init editor view
   private initEditor() {
-    const strDocument = JSON.stringify(initalDocument);
-    // let combinedDocuments: Node | null = combineDocuments(this.mySchema, [strDocument, strDocument]);
-    let combinedDocuments: Node | null = combineJsonDocuments(this.mySchema, [
-      strDocument,
-      strDocument,
-      strDocument,
-      strDocument,
-      strDocument,
-      strDocument,
-      strDocument,
-      strDocument,
-      strDocument,
-      strDocument,
-      strDocument,
-      strDocument,
-      strDocument,
-      strDocument,
-      strDocument,
-    ]);
-    console.log(combinedDocuments);
+    // const strDocument = JSON.stringify(initalDocument);
+    // // let combinedDocuments: Node | null = combineDocuments(this.mySchema, [strDocument, strDocument]);
+    // let combinedDocuments: Node | null = combineJsonDocuments(this.mySchema, [
+    //   strDocument,
+    //   strDocument,
+    
+    // ]);
+    // console.log(combinedDocuments);
 
-    // const doc = Node.fromJSON(this.mySchema, initalDocument);
-    const doc = combinedDocuments!;
+    const doc = Node.fromJSON(this.mySchema, table5x10WithMergedRows);
+    // const doc = combinedDocuments!;
     const findNextBlock = (transaction: Transaction) => {
       const nodeAfter = Selection.findFrom(
         transaction.doc.resolve(transaction.selection.$from.after() + 1),
