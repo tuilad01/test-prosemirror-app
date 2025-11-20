@@ -38,7 +38,7 @@ export function blockHeightPlugin(config?: any) {
       apply: (tr, oldSet: BlockHeight[], oldState, newState) => {
         // 2. update for each transaction
         const step = tr.steps[0];
-        const action = ActionFactory.create(tr, step);
+        const action = ActionFactory.create(tr, step, oldState);
         // console.log(action, 'action');
         if (action) {
           action.handle({
@@ -58,7 +58,7 @@ export function blockHeightPlugin(config?: any) {
 }
 
 class ActionFactory {
-  static create(tr: Transaction, step: Step): Action | null {
+  static create(tr: Transaction, step: Step, oldState: EditorState): Action | null {
     if (!tr.docChanged) {
       return new ClickingAction();
     }
@@ -70,6 +70,20 @@ class ActionFactory {
 
       //if (inserted && !deleted) return new InsertAction(tr, step);
       // if (!inserted && deleted) return new DeleteAction(tr, step);
+
+      console.log(step, 'step');
+      const blockRange  = tr.doc.resolve(step.from).blockRange(tr.doc.resolve(step.to));
+      if (blockRange) {
+        console.log(blockRange, "blockRange");
+        for (let index = blockRange.startIndex; index <= blockRange.endIndex; index++) {
+          const block = tr.doc.child(index);
+          console.log(block.textContent, "block.textContent");
+          const isSameBlock = block.eq(oldState.doc.child(index));
+       
+          console.log(isSameBlock, "isSameBlock");
+        }
+
+      }
       if (typing) {
         return new TypingAction();
       }
@@ -80,11 +94,11 @@ class ActionFactory {
 
       // return EnterAction
       const isStructuralSplit =
-        !deleted && inserted && step.slice.openStart === step.slice.openEnd;
-
-      if (isStructuralSplit) {
-        return new EnterAction();
-      }
+        !deleted && inserted;
+      
+      // if (isStructuralSplit) {
+      //   return new EnterAction();
+      // }
     }
 
     return new UnknownAction();

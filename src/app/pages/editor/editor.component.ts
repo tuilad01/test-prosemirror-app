@@ -1,91 +1,47 @@
 import {
-  afterNextRender,
   Component,
   effect,
   ElementRef,
-  inject,
   model,
   ModelSignal,
   OnDestroy,
   viewChild,
-  ViewEncapsulation,
+  ViewEncapsulation
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { EditorState, Selection, Transaction } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
-import { Fragment, Mark } from 'prosemirror-model';
-import { exampleSetup } from 'prosemirror-example-setup';
-import { pageSchema } from '@app/prosemirror/schema/page-schema';
-import { Node } from 'prosemirror-model';
-import { selectionPlugin } from '@app/prosemirror/plugins/selection-plugin';
-import { Router } from '@angular/router';
-import { editableHeaderNodeName } from '@app/prosemirror/nodes/editable-header-nodeview';
-import { headerNodeName } from '@app/prosemirror/nodes/page-header';
-import { decorationPlugin } from '@app/prosemirror/plugins/decoration-plugin';
-import {
-  imageBlockNodeName,
-  ImageBlockNodeView,
-} from '@app/prosemirror/nodes/image-block';
-import { customListNodeName } from '@app/prosemirror/nodes/custom-list';
 import {
   customListItemNodeName,
   customListItemNodeView,
 } from '@app/prosemirror/nodes/custom-list-item';
-import { keymap } from 'prosemirror-keymap';
 import {
-  cellAround,
+  imageBlockNodeName,
+  ImageBlockNodeView,
+} from '@app/prosemirror/nodes/image-block';
+import { decorationPlugin } from '@app/prosemirror/plugins/decoration-plugin';
+import { blockHeightPlugin } from '@app/prosemirror/plugins/page-plugin/block-height-plugin';
+import { pageSchema } from '@app/prosemirror/schema/page-schema';
+import { MenuItem } from 'primeng/api';
+import { MenubarModule } from 'primeng/menubar';
+import { exampleSetup } from 'prosemirror-example-setup';
+import { keymap } from 'prosemirror-keymap';
+import { Node } from 'prosemirror-model';
+import { EditorState, Selection, Transaction } from 'prosemirror-state';
+import { EditorView } from 'prosemirror-view';
+import {
   columnResizing,
-  deleteTable,
   fixTables,
   goToNextCell,
-  selectedRect,
   tableEditing,
-  TableMap,
-  TableView,
+  TableView
 } from '../../prosemirror/modules/table/index';
 import {
-  distributeSelectedColumnsWidth,
-  handleDistributeCells,
-  handleInsertTable,
-  handleSetBorderNone,
-  handleSplitTable,
-  insertTable,
-  TableBorder,
-} from './commands/table';
-import { lift, toggleMark } from 'prosemirror-commands';
-import { liftListItem } from 'prosemirror-schema-list';
-import {
-  splitTable,
-  splitTablePlugin,
-} from '@app/prosemirror/plugins/split-table-plugin';
-import { MenubarModule } from 'primeng/menubar';
-import { MenuItem } from 'primeng/api';
-import { initalDocument } from './document';
-import {
-  handleInsertEditableHeader,
-  handleInsertHeader,
-  insertNewPage,
-} from './commands/page';
-import {
   handleEnter,
-  handleEnterFontFamily,
-  handleToggleFontSize,
-  increaseFontSize,
+  handleEnterFontFamily
 } from './commands/mark';
-import { insertImage } from './commands/image';
-import { handleRemoveList } from './commands/list';
-import { Transform } from 'prosemirror-transform';
-import {
-  combineDocuments,
-  combineJsonDocuments,
-} from '@app/prosemirror/common/common';
-import { zoomIn, zoomIn2, zoomOut } from './commands/editor';
+import { commonDocument } from './data/common';
 import { getDefaultMenu } from './menu/default-menu';
 import { Menu } from './menu/menu';
-import { blockHeightPlugin } from '@app/prosemirror/plugins/page-plugin/block-height-plugin';
 import { EditorViewService } from './services/editor-view.service';
-import { table5x10WithMergedCells } from './data/table-5x10-merged-cells';
-import { table5x10WithMergedRows } from './data/table-5x10-merged-rows';
 @Component({
   selector: 'app-editor',
   imports: [FormsModule, MenubarModule],
@@ -166,7 +122,8 @@ export class EditorComponent implements OnDestroy {
     // ]);
     // console.log(combinedDocuments);
 
-    const doc = Node.fromJSON(this.mySchema, table5x10WithMergedRows);
+    // const doc = Node.fromJSON(this.mySchema, table5x10WithMergedRows);
+    const doc = Node.fromJSON(this.mySchema, commonDocument)
     // const doc = combinedDocuments!;
     const findNextBlock = (transaction: Transaction) => {
       const nodeAfter = Selection.findFrom(
@@ -247,7 +204,7 @@ export class EditorComponent implements OnDestroy {
         //footerPlugin,
         decorationPlugin,
         //pageBreakPlugin2(this.view),
-        blockHeightPlugin({ measurementView: this.measurementView }),
+        // blockHeightPlugin({ measurementView: this.measurementView }),
       ],
     });
 

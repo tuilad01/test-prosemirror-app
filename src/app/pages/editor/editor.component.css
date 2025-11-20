@@ -43,3 +43,7 @@
 .editor-content ul {
   @apply list-disc;
 }
+
+.editor-content ol{
+  @apply list-decimal;
+}

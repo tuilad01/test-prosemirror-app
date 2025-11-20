@@ -1,4 +1,4 @@
-export const initalDocument = {
+export const commonDocument = {
   type: 'doc',
   content: [
     {
